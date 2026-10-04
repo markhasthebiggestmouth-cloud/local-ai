@@ -1,553 +1,423 @@
-(async () => {
+(() => {
+  const OLD = document.getElementById("qwen-floating-chat");
 
-    const old = document.getElementById("grandpa-qwen");
+  if (OLD) {
+    OLD.remove();
+    return;
+  }
 
-    if (old) {
-        old.remove();
-        return;
-    }
+  const MODEL = "onnx-community/Qwen3-0.6B-ONNX";
 
-    // =========================
-    // WINDOW
-    // =========================
+  let generator = null;
+  let busy = false;
+  let messages = [];
 
-    const box = document.createElement("div");
+  // =========================
+  // UI
+  // =========================
 
-    box.id = "grandpa-qwen";
+  const box = document.createElement("div");
+  box.id = "qwen-floating-chat";
 
-    box.style.cssText = `
-        position:fixed;
-        z-index:2147483647;
+  box.style.cssText = `
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    right: 20px;
+    bottom: 20px;
+    background: white;
+    color: #111;
+    z-index: 2147483647;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.18);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  `;
 
-        width:300px;
-        height:300px;
-
-        top:20px;
-        right:20px;
-
-        background:#ffffff;
-        color:#111111;
-
-        border:1px solid #e5e5e5;
-        border-radius:16px;
-
-        box-shadow:
-            0 12px 35px rgba(0,0,0,.14),
-            0 2px 8px rgba(0,0,0,.08);
-
-        overflow:hidden;
-
-        font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            Arial,
-            sans-serif;
-
-        display:flex;
-        flex-direction:column;
-    `;
-
-    // =========================
-    // HEADER
-    // =========================
-
-    const header = document.createElement("div");
-
-    header.style.cssText = `
-        height:42px;
-        min-height:42px;
-
+  box.innerHTML = `
+    <div id="qwen-header"
+      style="
+        height:40px;
+        min-height:40px;
+        border-bottom:1px solid #eee;
         display:flex;
         align-items:center;
         justify-content:space-between;
-
-        padding:0 12px;
-
-        border-bottom:1px solid #eeeeee;
-
-        background:#ffffff;
-
-        cursor:move;
-        user-select:none;
-    `;
-
-    const title = document.createElement("div");
-
-    title.textContent = "Qwen";
-
-    title.style.cssText = `
-        font-size:14px;
-        font-weight:600;
-    `;
-
-    const close = document.createElement("button");
-
-    close.textContent = "×";
-
-    close.style.cssText = `
-        width:28px;
-        height:28px;
-
-        border:0;
-        border-radius:8px;
-
-        background:transparent;
-
-        color:#777;
-
-        font-size:20px;
-
-        cursor:pointer;
-    `;
-
-    close.onclick = () => {
-        box.remove();
-    };
-
-    header.appendChild(title);
-    header.appendChild(close);
-
-    // =========================
-    // CHAT
-    // =========================
-
-    const chat = document.createElement("div");
-
-    chat.style.cssText = `
-        flex:1;
-
-        padding:10px;
-
-        overflow-y:auto;
-
-        background:#ffffff;
-
-        display:flex;
-        flex-direction:column;
-
-        gap:8px;
-    `;
-
-    // =========================
-    // STATUS
-    // =========================
-
-    const status = document.createElement("div");
-
-    status.style.cssText = `
-        align-self:flex-start;
-
-        max-width:85%;
-
-        padding:8px 10px;
-
-        background:#f1f1f1;
-
-        border-radius:12px;
-
-        font-size:12px;
-
-        line-height:1.4;
-
-        white-space:pre-wrap;
-    `;
-
-    status.textContent = "Loading Qwen...";
-
-    chat.appendChild(status);
-
-    // =========================
-    // INPUT AREA
-    // =========================
-
-    const inputArea = document.createElement("div");
-
-    inputArea.style.cssText = `
-        padding:8px;
-
-        border-top:1px solid #eeeeee;
-
-        display:flex;
-
-        gap:6px;
-
-        background:#ffffff;
-    `;
-
-    const input = document.createElement("input");
-
-    input.placeholder = "Message Qwen...";
-
-    input.style.cssText = `
-        flex:1;
-
-        min-width:0;
-
-        height:32px;
-
-        box-sizing:border-box;
-
         padding:0 10px;
+        box-sizing:border-box;
+        cursor:grab;
+        user-select:none;
+      "
+    >
+      <div style="font-size:14px;font-weight:600;">
+        Qwen
+      </div>
 
-        border:1px solid #dddddd;
+      <button id="qwen-close"
+        style="
+          border:0;
+          background:transparent;
+          font-size:20px;
+          color:#777;
+          cursor:pointer;
+          width:28px;
+          height:28px;
+          border-radius:7px;
+        "
+      >×</button>
+    </div>
 
-        border-radius:10px;
+    <div id="qwen-status"
+      style="
+        font-size:11px;
+        color:#777;
+        padding:6px 10px;
+        border-bottom:1px solid #eee;
+      "
+    >
+      Loading Qwen3...
+    </div>
 
-        background:#ffffff;
+    <div id="qwen-chat"
+      style="
+        flex:1;
+        overflow-y:auto;
+        padding:10px;
+        box-sizing:border-box;
+        background:#fff;
+      "
+    ></div>
 
-        color:#111111;
+    <div
+      style="
+        border-top:1px solid #eee;
+        padding:8px;
+        display:flex;
+        gap:6px;
+        box-sizing:border-box;
+      "
+    >
+      <input
+        id="qwen-input"
+        type="text"
+        placeholder="Message Qwen..."
+        disabled
+        style="
+          flex:1;
+          min-width:0;
+          height:32px;
+          border:1px solid #ddd;
+          border-radius:9px;
+          padding:0 10px;
+          outline:none;
+          font-size:13px;
+          color:#111;
+          background:white;
+          box-sizing:border-box;
+        "
+      />
 
-        outline:none;
+      <button
+        id="qwen-send"
+        disabled
+        style="
+          width:34px;
+          height:32px;
+          border:0;
+          border-radius:9px;
+          background:#111;
+          color:white;
+          cursor:pointer;
+          font-size:16px;
+        "
+      >↑</button>
+    </div>
+  `;
 
-        font-size:12px;
+  document.body.appendChild(box);
+
+  const header = document.getElementById("qwen-header");
+  const close = document.getElementById("qwen-close");
+  const status = document.getElementById("qwen-status");
+  const chat = document.getElementById("qwen-chat");
+  const input = document.getElementById("qwen-input");
+  const send = document.getElementById("qwen-send");
+
+  // =========================
+  // Chat messages
+  // =========================
+
+  function addMessage(name, text) {
+    const wrapper = document.createElement("div");
+
+    wrapper.style.cssText = `
+      margin-bottom:10px;
+      line-height:1.4;
+      font-size:13px;
+      word-wrap:break-word;
     `;
 
-    const send = document.createElement("button");
+    const nameEl = document.createElement("div");
 
-    send.textContent = "↑";
+    nameEl.textContent = name;
 
-    send.style.cssText = `
-        width:32px;
-        height:32px;
-
-        border:0;
-        border-radius:10px;
-
-        background:#111111;
-
-        color:#ffffff;
-
-        font-size:16px;
-
-        cursor:pointer;
+    nameEl.style.cssText = `
+      font-size:11px;
+      font-weight:600;
+      color:${name === "You" ? "#777" : "#111"};
+      margin-bottom:2px;
     `;
 
-    inputArea.appendChild(input);
-    inputArea.appendChild(send);
+    const textEl = document.createElement("div");
 
-    box.appendChild(header);
-    box.appendChild(chat);
-    box.appendChild(inputArea);
+    textEl.textContent = text;
 
-    document.body.appendChild(box);
+    textEl.style.cssText = `
+      color:#222;
+      white-space:pre-wrap;
+    `;
 
-    // =========================
-    // DRAGGING
-    // =========================
+    wrapper.appendChild(nameEl);
+    wrapper.appendChild(textEl);
 
-    let dragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
+    chat.appendChild(wrapper);
+    chat.scrollTop = chat.scrollHeight;
 
-    header.addEventListener("pointerdown", event => {
+    return textEl;
+  }
 
-        if (event.target === close) {
-            return;
-        }
+  addMessage("Qwen", "Loading...");
 
-        dragging = true;
+  // =========================
+  // Load Qwen
+  // =========================
 
-        const rect = box.getBoundingClientRect();
-
-        offsetX =
-            event.clientX - rect.left;
-
-        offsetY =
-            event.clientY - rect.top;
-
-        header.setPointerCapture(
-            event.pointerId
-        );
-    });
-
-    header.addEventListener("pointermove", event => {
-
-        if (!dragging) {
-            return;
-        }
-
-        box.style.left =
-            `${event.clientX - offsetX}px`;
-
-        box.style.top =
-            `${event.clientY - offsetY}px`;
-
-        box.style.right = "auto";
-    });
-
-    header.addEventListener("pointerup", () => {
-        dragging = false;
-    });
-
-    // =========================
-    // QWEN
-    // =========================
-
-    let generator = null;
-
-    // THIS IS THE IMPORTANT PART:
-    // Same conversation format as your
-    // working index.html.
-
-    const messages = [];
-
-    let busy = false;
-
+  async function loadAI() {
     try {
+      if (!navigator.gpu) {
+        throw new Error("WebGPU is not available in this browser.");
+      }
 
-        status.textContent =
-            "Loading Transformers.js...";
+      status.textContent = "Loading Qwen3...";
 
-        const { pipeline } =
-            await import(
-                "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
-            );
+      const { pipeline } = await import(
+        "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
+      );
 
-        status.textContent =
-            "Loading Qwen3...";
+      generator = await pipeline(
+        "text-generation",
+        MODEL,
+        {
+          device: "webgpu",
+          dtype: "q4f16"
+        }
+      );
 
-        generator =
-            await pipeline(
-                "text-generation",
-                "onnx-community/Qwen3-0.6B-ONNX",
-                {
-                    device:"webgpu",
-                    dtype:"q4f16"
-                }
-            );
+      status.textContent = "Qwen3 Ready ✓";
 
-        status.textContent =
-            "Qwen is ready!";
+      input.disabled = false;
+      send.disabled = false;
+
+      chat.innerHTML = "";
+
+      addMessage(
+        "Qwen",
+        "I'm ready. Ask me anything."
+      );
+
+      input.focus();
 
     } catch (error) {
 
-        status.textContent =
-            "Qwen failed to load:\n" +
-            error.message;
+      console.error(error);
 
-        console.error(error);
+      status.textContent = "Qwen failed to load";
 
-        return;
+      chat.innerHTML = "";
+
+      addMessage(
+        "Qwen",
+        "Error loading Qwen: " +
+        (error.message || String(error))
+      );
+    }
+  }
+
+  // =========================
+  // Ask Qwen
+  // =========================
+
+  async function askQwen() {
+
+    if (!generator || busy) {
+      return;
     }
 
-    // =========================
-    // MESSAGE FUNCTION
-    // =========================
+    const question = input.value.trim();
 
-    function addMessage(text, user) {
-
-        const message =
-            document.createElement("div");
-
-        message.style.cssText = `
-            align-self:
-                ${user ? "flex-end" : "flex-start"};
-
-            max-width:85%;
-
-            padding:8px 10px;
-
-            border-radius:12px;
-
-            background:
-                ${user ? "#111111" : "#f1f1f1"};
-
-            color:
-                ${user ? "#ffffff" : "#222222"};
-
-            font-size:12px;
-
-            line-height:1.4;
-
-            white-space:pre-wrap;
-
-            word-break:break-word;
-        `;
-
-        message.textContent = text;
-
-        chat.appendChild(message);
-
-        chat.scrollTop =
-            chat.scrollHeight;
-
-        return message;
+    if (!question) {
+      return;
     }
 
-    // =========================
-    // ASK QWEN
-    // =========================
+    input.value = "";
 
-    async function askQwen() {
+    busy = true;
 
-        if (!generator || busy) {
-            return;
+    input.disabled = true;
+    send.disabled = true;
+
+    addMessage("You", question);
+
+    // IMPORTANT:
+    // Qwen receives the conversation history,
+    // just like the working index.html.
+
+    messages.push({
+      role: "user",
+      content: question
+    });
+
+    const answer = addMessage("Qwen", "");
+
+    try {
+
+      const output = await generator(
+        messages,
+        {
+          max_new_tokens: 256,
+          do_sample: false,
+          return_full_text: false
         }
+      );
 
-        const text =
-            input.value.trim();
+      let result = "";
 
-        if (!text) {
-            return;
+      if (output && output[0]) {
+
+        const generated = output[0].generated_text;
+
+        if (typeof generated === "string") {
+
+          result = generated;
+
+        } else if (Array.isArray(generated)) {
+
+          const last =
+            generated[generated.length - 1];
+
+          if (
+            last &&
+            typeof last.content === "string"
+          ) {
+            result = last.content;
+          }
         }
+      }
 
-        input.value = "";
+      if (!result) {
+        result = "Qwen returned an empty response.";
+      }
 
-        busy = true;
+      answer.textContent = result;
 
-        input.disabled = true;
-        send.disabled = true;
+      // Save Qwen's response so the next
+      // question remembers the conversation.
 
-        addMessage(
-            text,
-            true
-        );
+      messages.push({
+        role: "assistant",
+        content: result
+      });
 
-        // EXACT SAME MESSAGE FORMAT
-        // USED BY YOUR WORKING INDEX
+    } catch (error) {
 
-        messages.push({
-            role:"user",
-            content:text
-        });
+      console.error(error);
 
-        const answer =
-            addMessage(
-                "",
-                false
-            );
-
-        try {
-
-            // IMPORTANT:
-            // Send the FULL conversation,
-            // NOT just the string.
-
-            const output =
-                await generator(
-                    messages,
-                    {
-                        max_new_tokens:256,
-
-                        do_sample:false,
-
-                        return_full_text:false
-                    }
-                );
-
-            let result = "";
-
-            if (
-                output &&
-                output[0]
-            ) {
-
-                const generated =
-                    output[0].generated_text;
-
-                // Normal string response
-
-                if (
-                    typeof generated ===
-                    "string"
-                ) {
-
-                    result =
-                        generated;
-                }
-
-                // Chat-style response
-
-                else if (
-                    Array.isArray(
-                        generated
-                    )
-                ) {
-
-                    const last =
-                        generated[
-                            generated.length - 1
-                        ];
-
-                    if (
-                        last &&
-                        typeof last.content ===
-                        "string"
-                    ) {
-
-                        result =
-                            last.content;
-                    }
-                }
-            }
-
-            if (!result) {
-
-                result =
-                    "Qwen returned an empty response.";
-            }
-
-            answer.textContent =
-                result;
-
-            // Keep conversation history
-
-            messages.push({
-                role:"assistant",
-                content:result
-            });
-
-        } catch (error) {
-
-            answer.textContent =
-                "Error:\n" +
-                (
-                    error.message ||
-                    String(error)
-                );
-
-            console.error(error);
-        }
-
-        busy = false;
-
-        input.disabled = false;
-        send.disabled = false;
-
-        input.focus();
-
-        chat.scrollTop =
-            chat.scrollHeight;
+      answer.textContent =
+        "Error: " +
+        (error.message || String(error));
     }
 
-    // =========================
-    // BUTTON
-    // =========================
+    busy = false;
 
-    send.addEventListener(
-        "click",
-        askQwen
-    );
+    input.disabled = false;
+    send.disabled = false;
 
-    // =========================
-    // ENTER
-    // =========================
+    input.focus();
+  }
 
-    input.addEventListener(
-        "keydown",
-        event => {
+  // =========================
+  // Send button
+  // =========================
 
-            if (
-                event.key ===
-                "Enter"
-            ) {
+  send.addEventListener("click", askQwen);
 
-                event.preventDefault();
+  input.addEventListener("keydown", (event) => {
 
-                askQwen();
-            }
-        }
-    );
+    if (event.key === "Enter") {
+      event.preventDefault();
+      askQwen();
+    }
+
+  });
+
+  // =========================
+  // Close button
+  // =========================
+
+  close.addEventListener("click", () => {
+    box.remove();
+  });
+
+  // =========================
+  // Dragging
+  // =========================
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  header.addEventListener("mousedown", (event) => {
+
+    dragging = true;
+
+    const rect = box.getBoundingClientRect();
+
+    offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+
+    header.style.cursor = "grabbing";
+  });
+
+  document.addEventListener("mousemove", (event) => {
+
+    if (!dragging) {
+      return;
+    }
+
+    box.style.left =
+      (event.clientX - offsetX) + "px";
+
+    box.style.top =
+      (event.clientY - offsetY) + "px";
+
+    box.style.right = "auto";
+    box.style.bottom = "auto";
+  });
+
+  document.addEventListener("mouseup", () => {
+
+    dragging = false;
+
+    header.style.cursor = "grab";
+  });
+
+  // =========================
+  // Start Qwen
+  // =========================
+
+  loadAI();
 
 })();
