@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Local AI</title>
+<title>Local AI v3</title>
 
 <style>
 * {
@@ -15,35 +15,64 @@ body {
     margin: 0;
     width: 100vw;
     height: 100vh;
-    background: transparent;
+    overflow: hidden;
+
+    /* NEW WALLPAPER */
+    background:
+        radial-gradient(circle at 20% 20%, #7c3aed 0%, transparent 35%),
+        radial-gradient(circle at 80% 80%, #2563eb 0%, transparent 35%),
+        linear-gradient(135deg, #09001a, #17002e, #00152e);
+
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* small version marker */
+#version {
+    position: fixed;
+    right: 10px;
+    bottom: 8px;
+    color: rgba(255,255,255,.35);
+    font-size: 10px;
+}
+
+/* CHAT WINDOW */
+
 #chat {
     position: fixed;
+
     left: 20px;
     top: 20px;
 
     width: 300px;
     height: 300px;
 
-    background: #181818;
+    background: #151515;
+
     color: white;
 
     border-radius: 16px;
+
     overflow: hidden;
 
-    box-shadow: 0 10px 35px rgba(0,0,0,.4);
+    box-shadow:
+        0 15px 50px rgba(0,0,0,.55),
+        0 0 30px rgba(124,58,237,.25);
 
     display: flex;
     flex-direction: column;
 }
 
+/* HEADER */
+
 #top {
     height: 42px;
     min-height: 42px;
 
-    background: #242424;
+    background: linear-gradient(
+        90deg,
+        #3b0764,
+        #172554
+    );
 
     display: flex;
     align-items: center;
@@ -51,6 +80,7 @@ body {
     padding: 0 12px;
 
     cursor: grab;
+
     user-select: none;
 }
 
@@ -65,9 +95,13 @@ body {
 
 #status {
     margin-left: auto;
+
     font-size: 10px;
-    color: #999;
+
+    color: #c4b5fd;
 }
+
+/* MESSAGES */
 
 #messages {
     flex: 1;
@@ -78,6 +112,7 @@ body {
 
     display: flex;
     flex-direction: column;
+
     gap: 6px;
 }
 
@@ -99,13 +134,17 @@ body {
 
 .user {
     align-self: flex-end;
-    background: #3478f6;
+
+    background: #6d28d9;
 }
 
 .ai {
     align-self: flex-start;
+
     background: #292929;
 }
+
+/* INPUT */
 
 #inputArea {
     display: flex;
@@ -114,14 +153,16 @@ body {
 
     padding: 7px;
 
-    background: #222;
+    background: #202020;
 }
 
 #input {
     min-width: 0;
+
     flex: 1;
 
     border: none;
+
     outline: none;
 
     border-radius: 9px;
@@ -129,6 +170,7 @@ body {
     padding: 8px;
 
     background: #333;
+
     color: white;
 }
 
@@ -143,7 +185,7 @@ body {
 
     border-radius: 9px;
 
-    background: #3478f6;
+    background: #7c3aed;
 
     color: white;
 
@@ -161,14 +203,23 @@ body {
 <div id="chat">
 
     <div id="top">
-        <span id="name">🤖 Local AI</span>
-        <span id="status">Loading...</span>
+
+        <span id="name">
+            🤖 Local AI v3
+        </span>
+
+        <span id="status">
+            Starting...
+        </span>
+
     </div>
 
     <div id="messages">
+
         <div class="message ai">
-            Loading Qwen3...
+            Starting local AI...
         </div>
+
     </div>
 
     <div id="inputArea">
@@ -187,124 +238,205 @@ body {
 
 </div>
 
+<div id="version">
+    LOCAL AI v3
+</div>
+
+
 <script type="module">
+
+/*
+    LOCAL AI v3
+
+    Qwen3 WebGPU
+*/
 
 import {
     pipeline,
     TextStreamer
 } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
 
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
-const send = document.getElementById("send");
-const status = document.getElementById("status");
+
+const messages =
+    document.getElementById("messages");
+
+const input =
+    document.getElementById("input");
+
+const send =
+    document.getElementById("send");
+
+const status =
+    document.getElementById("status");
+
 
 let generator = null;
 
 let conversation = [];
 
+
+/* ADD MESSAGE */
+
 function addMessage(text, type) {
 
-    const message = document.createElement("div");
+    const message =
+        document.createElement("div");
 
-    message.className = "message " + type;
+    message.className =
+        "message " + type;
 
-    message.textContent = text;
+    message.textContent =
+        text;
 
     messages.appendChild(message);
 
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop =
+        messages.scrollHeight;
 
     return message;
 }
+
+
+/* LOAD AI */
 
 async function loadAI() {
 
     try {
 
-        status.textContent = "Loading...";
+        status.textContent =
+            "Loading Qwen3...";
+
+        /*
+            IMPORTANT:
+
+            Start with the basic WebGPU
+            configuration that the
+            working Qwen3 demo uses.
+        */
 
         generator = await pipeline(
+
             "text-generation",
+
             "onnx-community/Qwen3-0.6B-ONNX",
+
             {
                 device: "webgpu"
             }
+
         );
 
-        status.textContent = "Ready";
+
+        status.textContent =
+            "Ready";
 
         messages.innerHTML = "";
 
         addMessage(
-            "Qwen3 is ready. Ask me anything!",
+            "Qwen3 is ready! Ask me something.",
             "ai"
         );
 
         input.disabled = false;
+
         send.disabled = false;
 
         input.focus();
+
 
     } catch (error) {
 
         console.error(error);
 
-        status.textContent = "Failed";
+        status.textContent =
+            "ERROR";
 
         messages.innerHTML = "";
 
         addMessage(
-            "AI failed to load.\n\n" +
+            "Qwen3 could not start.\n\n" +
+            error.name +
+            "\n\n" +
             error.message,
             "ai"
         );
 
     }
+
 }
+
+
+/* ASK AI */
 
 async function ask() {
 
-    const question = input.value.trim();
+    const question =
+        input.value.trim();
 
     if (!question || !generator) {
         return;
     }
 
+
     input.value = "";
 
     input.disabled = true;
+
     send.disabled = true;
 
-    addMessage(question, "user");
+
+    addMessage(
+        question,
+        "user"
+    );
+
 
     conversation.push({
+
         role: "user",
+
         content: question
+
     });
 
-    const answerBox = addMessage("", "ai");
+
+    const answer =
+        addMessage("", "ai");
+
 
     try {
 
-        const streamer = new TextStreamer(
-            generator.tokenizer,
-            {
-                skip_prompt: true,
+        const streamer =
+            new TextStreamer(
 
-                callback_function: (token) => {
+                generator.tokenizer,
 
-                    answerBox.textContent += token;
+                {
 
-                    messages.scrollTop =
-                        messages.scrollHeight;
+                    skip_prompt: true,
+
+                    callback_function:
+                        (token) => {
+
+                            answer.textContent +=
+                                token;
+
+                            messages.scrollTop =
+                                messages.scrollHeight;
+
+                        }
+
                 }
-            }
-        );
 
-        const result = await generator(
+            );
+
+
+        await generator(
+
             conversation,
+
             {
+
                 max_new_tokens: 256,
 
                 temperature: 0.7,
@@ -312,59 +444,65 @@ async function ask() {
                 do_sample: true,
 
                 streamer: streamer
+
             }
+
         );
 
-        if (!answerBox.textContent.trim()) {
-
-            const generated =
-                result?.[0]?.generated_text;
-
-            if (typeof generated === "string") {
-
-                answerBox.textContent =
-                    generated;
-            }
-        }
 
         conversation.push({
+
             role: "assistant",
-            content: answerBox.textContent
+
+            content:
+                answer.textContent
+
         });
+
 
     } catch (error) {
 
-        answerBox.textContent =
-            "Error: " + error.message;
+        answer.textContent =
+            "Generation error:\n" +
+            error.message;
 
     }
 
+
     input.disabled = false;
+
     send.disabled = false;
 
     input.focus();
+
 }
+
+
+/* BUTTON */
 
 send.addEventListener(
     "click",
     ask
 );
 
+
+/* ENTER */
+
 input.addEventListener(
     "keydown",
     event => {
 
         if (event.key === "Enter") {
+
             ask();
+
         }
 
     }
 );
 
 
-// -------------------------
-// DRAGGABLE WINDOW
-// -------------------------
+/* DRAG WINDOW */
 
 const chat =
     document.getElementById("chat");
@@ -372,10 +510,13 @@ const chat =
 const top =
     document.getElementById("top");
 
+
 let dragging = false;
 
 let offsetX = 0;
+
 let offsetY = 0;
+
 
 top.addEventListener(
     "pointerdown",
@@ -387,16 +528,20 @@ top.addEventListener(
             chat.getBoundingClientRect();
 
         offsetX =
-            event.clientX - rect.left;
+            event.clientX -
+            rect.left;
 
         offsetY =
-            event.clientY - rect.top;
+            event.clientY -
+            rect.top;
 
         top.setPointerCapture(
             event.pointerId
         );
+
     }
 );
+
 
 top.addEventListener(
     "pointermove",
@@ -405,23 +550,28 @@ top.addEventListener(
         if (!dragging) return;
 
         chat.style.left =
-            (event.clientX - offsetX) + "px";
+            (event.clientX -
+            offsetX) + "px";
 
         chat.style.top =
-            (event.clientY - offsetY) + "px";
+            (event.clientY -
+            offsetY) + "px";
+
     }
 );
+
 
 top.addEventListener(
     "pointerup",
     () => {
 
         dragging = false;
+
     }
 );
 
 
-// START AI
+/* START */
 
 loadAI();
 
