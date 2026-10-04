@@ -1,14 +1,15 @@
 (async () => {
   const ID = "__LOCAL_QWEN_BOOKMARK__";
 
-  // Toggle off if already open
+  // Toggle the AI box
   const old = document.getElementById(ID);
+
   if (old) {
     old.remove();
     return;
   }
 
-  // Floating window
+  // Create the floating box
   const box = document.createElement("div");
 
   box.id = ID;
@@ -37,7 +38,7 @@
 
   document.body.appendChild(box);
 
-  // Loading message
+  // Loading screen
   const loading = document.createElement("div");
 
   loading.style.cssText = `
@@ -61,8 +62,7 @@
 
   try {
     /*
-      Load the actual Qwen page.
-      The page itself remains the working WebGPU page.
+      Load the working Qwen page.
     */
 
     const iframe = document.createElement("iframe");
@@ -90,9 +90,10 @@
 
   } catch (error) {
 
+    console.error(error);
+
     loading.textContent =
       "Qwen failed to start.";
-
-    console.error(error);
   }
+
 })();
