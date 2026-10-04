@@ -1,44 +1,41 @@
 (async () => {
-    // ==============================
-    // REMOVE OLD WINDOW
-    // ==============================
 
-    const existing = document.getElementById("grandpa-qwen");
+    const old = document.getElementById("grandpa-qwen");
 
-    if (existing) {
-        existing.remove();
+    if (old) {
+        old.remove();
         return;
     }
 
-    // ==============================
-    // MAIN WINDOW
-    // ==============================
+    // =========================
+    // WINDOW
+    // =========================
 
     const box = document.createElement("div");
 
     box.id = "grandpa-qwen";
 
     box.style.cssText = `
-        position: fixed;
-        z-index: 2147483647;
+        position:fixed;
+        z-index:2147483647;
 
-        width: 300px;
-        height: 300px;
+        width:300px;
+        height:300px;
 
-        top: 20px;
-        right: 20px;
+        top:20px;
+        right:20px;
 
-        background: #ffffff;
-        color: #111111;
+        background:#ffffff;
+        color:#111111;
 
-        border: 1px solid #e5e5e5;
-        border-radius: 16px;
+        border:1px solid #e5e5e5;
+        border-radius:16px;
 
         box-shadow:
-            0 12px 35px rgba(0,0,0,0.14),
-            0 2px 8px rgba(0,0,0,0.08);
+            0 12px 35px rgba(0,0,0,.14),
+            0 2px 8px rgba(0,0,0,.08);
 
-        overflow: hidden;
+        overflow:hidden;
 
         font-family:
             -apple-system,
@@ -47,32 +44,32 @@
             Arial,
             sans-serif;
 
-        display: flex;
-        flex-direction: column;
+        display:flex;
+        flex-direction:column;
     `;
 
-    // ==============================
+    // =========================
     // HEADER
-    // ==============================
+    // =========================
 
     const header = document.createElement("div");
 
     header.style.cssText = `
-        height: 42px;
-        min-height: 42px;
+        height:42px;
+        min-height:42px;
 
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
 
-        padding: 0 12px;
+        padding:0 12px;
 
-        border-bottom: 1px solid #eeeeee;
+        border-bottom:1px solid #eeeeee;
 
-        background: #ffffff;
+        background:#ffffff;
 
-        cursor: move;
-        user-select: none;
+        cursor:move;
+        user-select:none;
     `;
 
     const title = document.createElement("div");
@@ -80,189 +77,154 @@
     title.textContent = "Qwen";
 
     title.style.cssText = `
-        font-size: 14px;
-        font-weight: 600;
-        color: #111111;
+        font-size:14px;
+        font-weight:600;
     `;
 
-    const closeButton = document.createElement("button");
+    const close = document.createElement("button");
 
-    closeButton.textContent = "×";
+    close.textContent = "×";
 
-    closeButton.style.cssText = `
-        width: 28px;
-        height: 28px;
+    close.style.cssText = `
+        width:28px;
+        height:28px;
 
-        border: none;
-        border-radius: 8px;
+        border:0;
+        border-radius:8px;
 
-        background: transparent;
-        color: #777777;
+        background:transparent;
 
-        font-size: 20px;
-        line-height: 20px;
+        color:#777;
 
-        cursor: pointer;
+        font-size:20px;
+
+        cursor:pointer;
     `;
 
-    closeButton.onmouseenter = () => {
-        closeButton.style.background = "#f2f2f2";
-    };
-
-    closeButton.onmouseleave = () => {
-        closeButton.style.background = "transparent";
-    };
-
-    closeButton.onclick = () => {
+    close.onclick = () => {
         box.remove();
     };
 
     header.appendChild(title);
-    header.appendChild(closeButton);
+    header.appendChild(close);
 
-    // ==============================
-    // CHAT AREA
-    // ==============================
+    // =========================
+    // CHAT
+    // =========================
 
     const chat = document.createElement("div");
 
     chat.style.cssText = `
-        flex: 1;
+        flex:1;
 
-        padding: 10px;
+        padding:10px;
 
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow-y:auto;
 
-        background: #ffffff;
+        background:#ffffff;
 
-        display: flex;
-        flex-direction: column;
+        display:flex;
+        flex-direction:column;
 
-        gap: 8px;
-
-        scrollbar-width: thin;
+        gap:8px;
     `;
 
-    // ==============================
-    // WELCOME MESSAGE
-    // ==============================
+    // =========================
+    // STATUS
+    // =========================
 
-    const welcome = document.createElement("div");
+    const status = document.createElement("div");
 
-    welcome.style.cssText = `
-        align-self: flex-start;
+    status.style.cssText = `
+        align-self:flex-start;
 
-        max-width: 85%;
+        max-width:85%;
 
-        padding: 8px 10px;
+        padding:8px 10px;
 
-        background: #f1f1f1;
+        background:#f1f1f1;
 
-        border-radius: 12px;
+        border-radius:12px;
 
-        font-size: 12px;
-        line-height: 1.4;
+        font-size:12px;
 
-        color: #222222;
+        line-height:1.4;
 
-        white-space: pre-wrap;
-        word-break: break-word;
+        white-space:pre-wrap;
     `;
 
-    welcome.textContent = "Loading Qwen...";
+    status.textContent = "Loading Qwen...";
 
-    chat.appendChild(welcome);
+    chat.appendChild(status);
 
-    // ==============================
+    // =========================
     // INPUT AREA
-    // ==============================
+    // =========================
 
     const inputArea = document.createElement("div");
 
     inputArea.style.cssText = `
-        padding: 8px;
+        padding:8px;
 
-        border-top: 1px solid #eeeeee;
+        border-top:1px solid #eeeeee;
 
-        background: #ffffff;
+        display:flex;
 
-        display: flex;
+        gap:6px;
 
-        gap: 6px;
-
-        align-items: center;
+        background:#ffffff;
     `;
 
     const input = document.createElement("input");
 
-    input.type = "text";
-
     input.placeholder = "Message Qwen...";
 
     input.style.cssText = `
-        flex: 1;
+        flex:1;
 
-        min-width: 0;
+        min-width:0;
 
-        height: 32px;
+        height:32px;
 
-        box-sizing: border-box;
+        box-sizing:border-box;
 
-        padding: 0 10px;
+        padding:0 10px;
 
-        border: 1px solid #dddddd;
+        border:1px solid #dddddd;
 
-        border-radius: 10px;
+        border-radius:10px;
 
-        background: #ffffff;
+        background:#ffffff;
 
-        color: #111111;
+        color:#111111;
 
-        outline: none;
+        outline:none;
 
-        font-size: 12px;
+        font-size:12px;
     `;
-
-    input.onfocus = () => {
-        input.style.borderColor = "#999999";
-    };
-
-    input.onblur = () => {
-        input.style.borderColor = "#dddddd";
-    };
 
     const send = document.createElement("button");
 
     send.textContent = "↑";
 
     send.style.cssText = `
-        width: 32px;
-        height: 32px;
+        width:32px;
+        height:32px;
 
-        flex-shrink: 0;
+        border:0;
+        border-radius:10px;
 
-        border: none;
+        background:#111111;
 
-        border-radius: 10px;
+        color:#ffffff;
 
-        background: #111111;
+        font-size:16px;
 
-        color: #ffffff;
-
-        font-size: 16px;
-
-        font-weight: bold;
-
-        cursor: pointer;
+        cursor:pointer;
     `;
 
     inputArea.appendChild(input);
     inputArea.appendChild(send);
-
-    // ==============================
-    // BUILD WINDOW
-    // ==============================
 
     box.appendChild(header);
     box.appendChild(chat);
@@ -270,18 +232,17 @@
 
     document.body.appendChild(box);
 
-    // ==============================
+    // =========================
     // DRAGGING
-    // ==============================
+    // =========================
 
     let dragging = false;
-
     let offsetX = 0;
     let offsetY = 0;
 
-    header.addEventListener("pointerdown", (event) => {
+    header.addEventListener("pointerdown", event => {
 
-        if (event.target === closeButton) {
+        if (event.target === close) {
             return;
         }
 
@@ -289,13 +250,18 @@
 
         const rect = box.getBoundingClientRect();
 
-        offsetX = event.clientX - rect.left;
-        offsetY = event.clientY - rect.top;
+        offsetX =
+            event.clientX - rect.left;
 
-        header.setPointerCapture(event.pointerId);
+        offsetY =
+            event.clientY - rect.top;
+
+        header.setPointerCapture(
+            event.pointerId
+        );
     });
 
-    header.addEventListener("pointermove", (event) => {
+    header.addEventListener("pointermove", event => {
 
         if (!dragging) {
             return;
@@ -314,90 +280,89 @@
         dragging = false;
     });
 
-    // ==============================
-    // LOAD TRANSFORMERS.JS
-    // ==============================
+    // =========================
+    // QWEN
+    // =========================
 
-    let generator;
+    let generator = null;
+
+    // THIS IS THE IMPORTANT PART:
+    // Same conversation format as your
+    // working index.html.
+
+    const messages = [];
+
+    let busy = false;
 
     try {
 
-        welcome.textContent =
+        status.textContent =
             "Loading Transformers.js...";
 
-        const transformers =
+        const { pipeline } =
             await import(
                 "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
             );
 
-        const pipeline =
-            transformers.pipeline;
+        status.textContent =
+            "Loading Qwen3...";
 
-        welcome.textContent =
-            "Loading Qwen 3...";
+        generator =
+            await pipeline(
+                "text-generation",
+                "onnx-community/Qwen3-0.6B-ONNX",
+                {
+                    device:"webgpu",
+                    dtype:"q4f16"
+                }
+            );
 
-        // ==============================
-        // LOAD QWEN
-        // ==============================
-
-        generator = await pipeline(
-            "text-generation",
-            "onnx-community/Qwen3-0.6B-ONNX",
-            {
-                device: "webgpu",
-                dtype: "q4f16"
-            }
-        );
-
-        welcome.textContent =
+        status.textContent =
             "Qwen is ready!";
 
     } catch (error) {
 
-        welcome.textContent =
+        status.textContent =
             "Qwen failed to load:\n" +
             error.message;
 
-        console.error(
-            "Qwen loading error:",
-            error
-        );
+        console.error(error);
 
         return;
     }
 
-    // ==============================
-    // ADD MESSAGE
-    // ==============================
+    // =========================
+    // MESSAGE FUNCTION
+    // =========================
 
-    function addMessage(text, isUser) {
+    function addMessage(text, user) {
 
         const message =
             document.createElement("div");
 
         message.style.cssText = `
             align-self:
-                ${isUser ? "flex-end" : "flex-start"};
+                ${user ? "flex-end" : "flex-start"};
 
-            max-width: 85%;
+            max-width:85%;
 
-            padding: 8px 10px;
+            padding:8px 10px;
 
-            border-radius: 12px;
-
-            font-size: 12px;
-
-            line-height: 1.4;
-
-            white-space: pre-wrap;
-
-            word-break: break-word;
+            border-radius:12px;
 
             background:
-                ${isUser ? "#111111" : "#f1f1f1"};
+                ${user ? "#111111" : "#f1f1f1"};
 
             color:
-                ${isUser ? "#ffffff" : "#222222"};
+                ${user ? "#ffffff" : "#222222"};
+
+            font-size:12px;
+
+            line-height:1.4;
+
+            white-space:pre-wrap;
+
+            word-break:break-word;
         `;
 
         message.textContent = text;
@@ -410,123 +375,145 @@
         return message;
     }
 
-    // ==============================
+    // =========================
     // ASK QWEN
-    // ==============================
+    // =========================
 
     async function askQwen() {
 
-        const question =
+        if (!generator || busy) {
+            return;
+        }
+
+        const text =
             input.value.trim();
 
-        if (!question) {
+        if (!text) {
             return;
         }
 
         input.value = "";
 
-        // User message
+        busy = true;
+
+        input.disabled = true;
+        send.disabled = true;
+
         addMessage(
-            question,
+            text,
             true
         );
 
-        // Thinking message
+        // EXACT SAME MESSAGE FORMAT
+        // USED BY YOUR WORKING INDEX
+
+        messages.push({
+            role:"user",
+            content:text
+        });
+
         const answer =
             addMessage(
-                "Thinking...",
+                "",
                 false
             );
 
-        send.disabled = true;
-
-        send.style.opacity = "0.5";
-
-        input.disabled = true;
-
         try {
 
-            const result =
+            // IMPORTANT:
+            // Send the FULL conversation,
+            // NOT just the string.
+
+            const output =
                 await generator(
-                    question,
+                    messages,
                     {
-                        max_new_tokens: 256,
+                        max_new_tokens:256,
 
-                        do_sample: false,
+                        do_sample:false,
 
-                        return_full_text: false
+                        return_full_text:false
                     }
                 );
 
-            // ==============================
-            // SAFELY EXTRACT TEXT
-            // ==============================
-
-            let text = "";
+            let result = "";
 
             if (
-                Array.isArray(result) &&
-                result.length > 0
+                output &&
+                output[0]
             ) {
 
-                const first =
-                    result[0];
+                const generated =
+                    output[0].generated_text;
+
+                // Normal string response
 
                 if (
-                    first &&
-                    typeof first.generated_text ===
+                    typeof generated ===
                     "string"
                 ) {
 
-                    text =
-                        first.generated_text;
+                    result =
+                        generated;
+                }
 
-                } else if (
-                    first &&
-                    typeof first.text ===
-                    "string"
+                // Chat-style response
+
+                else if (
+                    Array.isArray(
+                        generated
+                    )
                 ) {
 
-                    text =
-                        first.text;
+                    const last =
+                        generated[
+                            generated.length - 1
+                        ];
 
-                } else if (
-                    typeof first ===
-                    "string"
-                ) {
+                    if (
+                        last &&
+                        typeof last.content ===
+                        "string"
+                    ) {
 
-                    text =
-                        first;
+                        result =
+                            last.content;
+                    }
                 }
             }
 
-            // Prevent empty responses
-            if (!text) {
+            if (!result) {
 
-                text =
-                    "Qwen didn't return any text.";
+                result =
+                    "Qwen returned an empty response.";
             }
 
             answer.textContent =
-                text;
+                result;
+
+            // Keep conversation history
+
+            messages.push({
+                role:"assistant",
+                content:result
+            });
 
         } catch (error) {
 
             answer.textContent =
-                "Generation error:\n" +
-                error.message;
+                "Error:\n" +
+                (
+                    error.message ||
+                    String(error)
+                );
 
-            console.error(
-                "Qwen generation error:",
-                error
-            );
+            console.error(error);
         }
 
-        send.disabled = false;
-
-        send.style.opacity = "1";
+        busy = false;
 
         input.disabled = false;
+        send.disabled = false;
 
         input.focus();
 
@@ -534,24 +521,27 @@
             chat.scrollHeight;
     }
 
-    // ==============================
-    // SEND BUTTON
-    // ==============================
+    // =========================
+    // BUTTON
+    // =========================
 
     send.addEventListener(
         "click",
         askQwen
     );
 
-    // ==============================
-    // ENTER TO SEND
-    // ==============================
+    // =========================
+    // ENTER
+    // =========================
 
     input.addEventListener(
         "keydown",
-        (event) => {
+        event => {
 
-            if (event.key === "Enter") {
+            if (
+                event.key ===
+                "Enter"
+            ) {
 
                 event.preventDefault();
 
