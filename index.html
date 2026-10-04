@@ -2,251 +2,270 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Local AI v5</title>
+<title>Local Qwen AI V6</title>
 
 <style>
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:white;
 }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* NEW WALLPAPER - VERSION 5 */
-body {
+/* V6 WALLPAPER */
+body{
     background:
-        radial-gradient(circle at 15% 20%, #7c3aed 0%, transparent 28%),
-        radial-gradient(circle at 85% 15%, #06b6d4 0%, transparent 25%),
-        radial-gradient(circle at 70% 85%, #ec4899 0%, transparent 30%),
-        linear-gradient(135deg, #050816, #111827 45%, #020617);
-    color: white;
+        radial-gradient(circle at 10% 10%,#00e5ff 0%,transparent 25%),
+        radial-gradient(circle at 90% 20%,#7c3aed 0%,transparent 28%),
+        radial-gradient(circle at 50% 100%,#ec4899 0%,transparent 32%),
+        linear-gradient(135deg,#020617,#0f172a,#030712);
 }
 
-/* Main window */
-#app {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+#app{
+    position:absolute;
+    width:300px;
+    height:300px;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
 
-    background: rgba(8, 12, 25, 0.92);
-    border: 1px solid rgba(255,255,255,.15);
-    border-radius: 18px;
+    background:rgba(3,7,18,.94);
+    border:1px solid rgba(255,255,255,.16);
+    border-radius:18px;
 
     box-shadow:
-        0 25px 80px rgba(0,0,0,.55),
-        0 0 35px rgba(124,58,237,.25);
+        0 25px 80px rgba(0,0,0,.65),
+        0 0 40px rgba(0,229,255,.18);
 
-    backdrop-filter: blur(18px);
-    overflow: hidden;
+    overflow:hidden;
 }
 
-/* Header */
-#header {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
+#header{
+    height:42px;
+    display:flex;
+    align-items:center;
+    padding:0 12px;
 
-    background: rgba(255,255,255,.06);
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.06);
+    border-bottom:1px solid rgba(255,255,255,.08);
 
-    cursor: grab;
-    user-select: none;
-    touch-action: none;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
 }
 
-#header:active {
-    cursor: grabbing;
+#header:active{
+    cursor:grabbing;
 }
 
-#dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #a855f7;
-    box-shadow: 0 0 12px #a855f7;
-    margin-right: 8px;
+#dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#00e5ff;
+    box-shadow:0 0 14px #00e5ff;
+    margin-right:8px;
 }
 
-#title {
-    font-size: 13px;
-    font-weight: 700;
+#title{
+    font-size:13px;
+    font-weight:700;
 }
 
-#version {
-    margin-left: auto;
-    font-size: 9px;
-    opacity: .5;
+#version{
+    margin-left:auto;
+    font-size:9px;
+    opacity:.45;
 }
 
-/* Status */
-#statusArea {
-    padding: 10px 12px 6px;
+#statusArea{
+    padding:9px 12px 4px;
 }
 
-#status {
-    font-size: 11px;
-    color: #cbd5e1;
-    margin-bottom: 6px;
+#status{
+    font-size:11px;
+    margin-bottom:5px;
+    color:#e2e8f0;
 }
 
-/* Progress */
-#progressOuter {
-    width: 100%;
-    height: 8px;
-    background: rgba(255,255,255,.08);
-    border-radius: 99px;
-    overflow: hidden;
+#file{
+    font-size:9px;
+    color:#94a3b8;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    margin-bottom:5px;
 }
 
-#progressBar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #8b5cf6, #06b6d4);
-    border-radius: 99px;
-    transition: width .2s ease;
+#progressOuter{
+    height:9px;
+    width:100%;
+    border-radius:99px;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
 }
 
-#progressText {
-    margin-top: 4px;
-    font-size: 9px;
-    color: #94a3b8;
+#progressBar{
+    width:0%;
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,#00e5ff,#8b5cf6,#ec4899);
+    transition:width:.15s linear;
 }
 
-/* Heat */
-#heatBox {
-    margin: 4px 12px 6px;
-    padding: 7px 9px;
-
-    background: rgba(255,255,255,.045);
-    border: 1px solid rgba(255,255,255,.07);
-    border-radius: 10px;
+#progressInfo{
+    display:flex;
+    justify-content:space-between;
+    margin-top:4px;
+    font-size:9px;
+    color:#94a3b8;
 }
 
-#heatTop {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    margin-bottom: 5px;
+#files{
+    height:45px;
+    margin:3px 12px 2px;
+    padding:5px 7px;
+
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:8px;
+
+    overflow-y:auto;
+    font-size:8px;
+    color:#64748b;
 }
 
-#heatValue {
-    font-weight: 700;
+.fileDone{
+    color:#86efac;
+    margin-bottom:2px;
 }
 
-#heatOuter {
-    width: 100%;
-    height: 6px;
-    background: rgba(255,255,255,.08);
-    border-radius: 99px;
-    overflow: hidden;
+/* HEAT */
+
+#heatBox{
+    margin:3px 12px 5px;
+    padding:6px 8px;
+
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:9px;
 }
 
-#heatBar {
-    width: 8%;
-    height: 100%;
-    background: #22c55e;
-    border-radius: 99px;
-    transition: width .5s ease, background .5s ease;
+#heatTop{
+    display:flex;
+    justify-content:space-between;
+    font-size:9px;
+    margin-bottom:4px;
 }
 
-#heatNote {
-    margin-top: 4px;
-    font-size: 8px;
-    color: #64748b;
+#heatValue{
+    font-weight:700;
 }
 
-/* Chat */
-#chat {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 145px;
-    bottom: 48px;
-
-    padding: 8px 11px;
-    overflow-y: auto;
-
-    font-size: 11px;
+#heatOuter{
+    width:100%;
+    height:6px;
+    background:rgba(255,255,255,.08);
+    border-radius:99px;
+    overflow:hidden;
 }
 
-.msg {
-    margin-bottom: 8px;
-    line-height: 1.4;
-    white-space: pre-wrap;
-    word-break: break-word;
+#heatBar{
+    width:5%;
+    height:100%;
+    background:#22c55e;
+    border-radius:99px;
+    transition:width .4s,background .4s;
 }
 
-.user {
-    color: #c4b5fd;
+#heatNote{
+    margin-top:3px;
+    font-size:7px;
+    color:#64748b;
 }
 
-.bot {
-    color: #e2e8f0;
+/* CHAT */
+
+#chat{
+    position:absolute;
+    top:160px;
+    bottom:48px;
+    left:0;
+    right:0;
+
+    padding:7px 11px;
+
+    overflow-y:auto;
+    font-size:11px;
 }
 
-.label {
-    font-weight: 700;
+.msg{
+    margin-bottom:8px;
+    line-height:1.4;
+    white-space:pre-wrap;
+    word-break:break-word;
 }
 
-/* Input */
-#inputArea {
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-
-    display: flex;
-    gap: 6px;
+.user{
+    color:#c4b5fd;
 }
 
-#input {
-    flex: 1;
-    min-width: 0;
-
-    height: 32px;
-    padding: 0 9px;
-
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 9px;
-
-    background: rgba(255,255,255,.06);
-    color: white;
-    outline: none;
-
-    font-size: 11px;
+.bot{
+    color:#e2e8f0;
 }
 
-#input:focus {
-    border-color: rgba(139,92,246,.7);
+.label{
+    font-weight:700;
 }
 
-#send {
-    width: 48px;
-    border: 0;
-    border-radius: 9px;
+#inputArea{
+    position:absolute;
+    left:8px;
+    right:8px;
+    bottom:8px;
 
-    background: #7c3aed;
-    color: white;
-    font-weight: 700;
-
-    cursor: pointer;
+    display:flex;
+    gap:6px;
 }
 
-#send:disabled {
-    opacity: .4;
-    cursor: default;
+#input{
+    flex:1;
+    min-width:0;
+
+    height:32px;
+    padding:0 9px;
+
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:9px;
+
+    background:rgba(255,255,255,.06);
+    color:white;
+    outline:none;
+
+    font-size:11px;
+}
+
+#send{
+    width:48px;
+
+    border:0;
+    border-radius:9px;
+
+    background:#7c3aed;
+    color:white;
+    font-weight:700;
+
+    cursor:pointer;
+}
+
+#send:disabled{
+    opacity:.4;
 }
 </style>
 </head>
@@ -258,20 +277,36 @@ body {
     <div id="header">
         <div id="dot"></div>
         <div id="title">Local Qwen AI</div>
-        <div id="version">V5</div>
+        <div id="version">V6</div>
     </div>
 
     <div id="statusArea">
-        <div id="status">Starting WebGPU...</div>
+
+        <div id="status">
+            Starting local AI...
+        </div>
+
+        <div id="file">
+            Waiting for model files...
+        </div>
 
         <div id="progressOuter">
             <div id="progressBar"></div>
         </div>
 
-        <div id="progressText">Preparing model...</div>
+        <div id="progressInfo">
+            <span id="percent">0%</span>
+            <span id="bytes">0 MB / ? MB</span>
+        </div>
+
+    </div>
+
+    <div id="files">
+        No files loaded yet.
     </div>
 
     <div id="heatBox">
+
         <div id="heatTop">
             <span>AI SYSTEM LOAD</span>
             <span id="heatValue">Cool</span>
@@ -284,24 +319,30 @@ body {
         <div id="heatNote">
             Estimated workload — not actual device temperature
         </div>
+
     </div>
 
     <div id="chat">
+
         <div class="msg bot">
             <span class="label">Qwen:</span>
-            Loading local AI...
+            Loading Qwen3 locally...
         </div>
+
     </div>
 
     <div id="inputArea">
+
         <input
             id="input"
-            type="text"
             placeholder="Talk to Qwen..."
             disabled
         >
 
-        <button id="send" disabled>Send</button>
+        <button id="send" disabled>
+            Send
+        </button>
+
     </div>
 
 </div>
@@ -309,124 +350,166 @@ body {
 
 <script type="module">
 
-/* =========================================================
-   LOCAL QWEN3 AI
-   ========================================================= */
+const MODEL =
+    "onnx-community/Qwen3-0.6B-ONNX";
 
-const MODEL = "onnx-community/Qwen3-0.6B-ONNX";
+const statusEl =
+    document.getElementById("status");
 
-const statusEl = document.getElementById("status");
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
+const fileEl =
+    document.getElementById("file");
 
-const input = document.getElementById("input");
-const send = document.getElementById("send");
-const chat = document.getElementById("chat");
+const progressBar =
+    document.getElementById("progressBar");
 
-const heatBar = document.getElementById("heatBar");
-const heatValue = document.getElementById("heatValue");
+const percentEl =
+    document.getElementById("percent");
+
+const bytesEl =
+    document.getElementById("bytes");
+
+const filesEl =
+    document.getElementById("files");
+
+const heatBar =
+    document.getElementById("heatBar");
+
+const heatValue =
+    document.getElementById("heatValue");
+
+const chat =
+    document.getElementById("chat");
+
+const input =
+    document.getElementById("input");
+
+const send =
+    document.getElementById("send");
+
 
 let generator = null;
 let busy = false;
+
 let messages = [];
 
 
-/* =========================================================
-   CHAT UI
-   ========================================================= */
+/* =========================================
+   FORMAT MB
+========================================= */
 
-function addMessage(who, text) {
+function mb(bytes){
 
-    const div = document.createElement("div");
+    if(!bytes || !isFinite(bytes)){
+        return "?";
+    }
+
+    return (
+        bytes / 1024 / 1024
+    ).toFixed(1);
+}
+
+
+/* =========================================
+   HEAT ESTIMATE
+========================================= */
+
+function heat(type){
+
+    let width = 5;
+    let color = "#22c55e";
+    let text = "Cool";
+
+    if(type === "loading"){
+        width = 30;
+        color = "#facc15";
+        text = "Loading";
+    }
+
+    if(type === "working"){
+        width = 75;
+        color = "#fb923c";
+        text = "High";
+    }
+
+    heatBar.style.width =
+        width + "%";
+
+    heatBar.style.background =
+        color;
+
+    heatValue.textContent =
+        text;
+}
+
+
+/* =========================================
+   CHAT MESSAGE
+========================================= */
+
+function addMessage(who,text){
+
+    const div =
+        document.createElement("div");
 
     div.className =
         "msg " +
-        (who === "You" ? "user" : "bot");
+        (who === "You"
+            ? "user"
+            : "bot");
 
-    div.innerHTML =
-        '<span class="label">' +
-        (who === "You" ? "You:" : "Qwen:") +
-        '</span> ';
+    const label =
+        document.createElement("span");
 
-    const content = document.createElement("span");
-    content.textContent = text;
+    label.className =
+        "label";
 
+    label.textContent =
+        who === "You"
+            ? "You: "
+            : "Qwen: ";
+
+    const content =
+        document.createElement("span");
+
+    content.textContent =
+        text;
+
+    div.appendChild(label);
     div.appendChild(content);
 
     chat.appendChild(div);
 
-    chat.scrollTop = chat.scrollHeight;
+    chat.scrollTop =
+        chat.scrollHeight;
 
     return content;
 }
 
 
-/* =========================================================
-   HEAT / WORKLOAD INDICATOR
-   ========================================================= */
-
-function setHeat(level) {
-
-    let percent = 8;
-    let text = "Cool";
-    let color = "#22c55e";
-
-    if (level === "loading") {
-        percent = 35;
-        text = "Loading";
-        color = "#facc15";
-    }
-
-    if (level === "working") {
-        percent = 75;
-        text = "High";
-        color = "#fb923c";
-    }
-
-    if (level === "veryhigh") {
-        percent = 92;
-        text = "Very High";
-        color = "#ef4444";
-    }
-
-    if (level === "idle") {
-        percent = 8;
-        text = "Cool";
-        color = "#22c55e";
-    }
-
-    heatBar.style.width = percent + "%";
-    heatBar.style.background = color;
-    heatValue.textContent = text;
-}
-
-
-/* =========================================================
+/* =========================================
    MODEL LOADING
-   ========================================================= */
+========================================= */
 
-async function loadAI() {
+async function loadAI(){
 
-    try {
+    try{
 
-        if (!navigator.gpu) {
+        if(!navigator.gpu){
+
             throw new Error(
-                "WebGPU is not available in this browser."
+                "WebGPU is not available."
             );
         }
 
+        heat("loading");
+
         statusEl.textContent =
-            "Loading Qwen3 locally...";
+            "Loading Qwen3...";
 
-        progressText.textContent =
-            "Downloading model files...";
-
-        setHeat("loading");
+        fileEl.textContent =
+            "Checking model files...";
 
 
-        /*
-         * Import Transformers.js directly from jsDelivr.
-         */
         const {
             pipeline
         } = await import(
@@ -434,262 +517,366 @@ async function loadAI() {
         );
 
 
-        /*
-         * Load Qwen3.
-         *
-         * progress_callback gives us the actual model
-         * download progress.
-         */
-        generator = await pipeline(
-            "text-generation",
-            MODEL,
-            {
-                device: "webgpu",
+        generator =
+            await pipeline(
+                "text-generation",
+                MODEL,
+                {
 
-                progress_callback: (progress) => {
-
-                    if (!progress) return;
-
+                    device:"webgpu",
 
                     /*
-                     * Download progress
+                     * This matches the official
+                     * Qwen3 WebGPU example.
                      */
-                    if (
-                        progress.status === "progress" &&
-                        typeof progress.progress === "number"
-                    ) {
+                    dtype:"q4f16",
 
-                        const percent =
-                            Math.max(
-                                0,
-                                Math.min(
-                                    100,
-                                    progress.progress
-                                )
-                            );
+                    progress_callback:
+                        (p)=>{
 
-                        progressBar.style.width =
-                            percent.toFixed(1) + "%";
-
-                        const file =
-                            progress.file || "model file";
-
-                        progressText.textContent =
-                            file +
-                            " — " +
-                            percent.toFixed(1) +
-                            "%";
-                    }
+                            if(!p) return;
 
 
-                    /*
-                     * Loading a file
-                     */
-                    if (
-                        progress.status === "initiate"
-                    ) {
+                            /* FILE START */
 
-                        progressText.textContent =
-                            "Loading " +
-                            (progress.file || "model file") +
-                            "...";
-                    }
+                            if(
+                                p.status ===
+                                "initiate"
+                            ){
+
+                                fileEl.textContent =
+                                    "Downloading: " +
+                                    (p.file || "file");
+
+                                progressBar.style.width =
+                                    "0%";
+
+                                percentEl.textContent =
+                                    "0%";
+
+                                bytesEl.textContent =
+                                    "0 MB / " +
+                                    mb(p.total) +
+                                    " MB";
+
+                                heat("loading");
+                            }
 
 
-                    /*
-                     * File finished
-                     */
-                    if (
-                        progress.status === "done"
-                    ) {
+                            /* PROGRESS */
 
-                        progressText.textContent =
-                            "Loaded " +
-                            (progress.file || "file");
-                    }
+                            if(
+                                p.status ===
+                                "progress"
+                            ){
+
+                                let value =
+                                    Number(
+                                        p.progress
+                                    );
+
+                                if(
+                                    !isFinite(value)
+                                ){
+                                    value = 0;
+                                }
+
+                                value =
+                                    Math.max(
+                                        0,
+                                        Math.min(
+                                            100,
+                                            value
+                                        )
+                                    );
+
+
+                                progressBar.style.width =
+                                    value.toFixed(1) +
+                                    "%";
+
+                                percentEl.textContent =
+                                    value.toFixed(1) +
+                                    "%";
+
+
+                                const loaded =
+                                    p.loaded || 0;
+
+                                const total =
+                                    p.total || 0;
+
+
+                                bytesEl.textContent =
+                                    mb(loaded) +
+                                    " MB / " +
+                                    mb(total) +
+                                    " MB";
+
+
+                                fileEl.textContent =
+                                    "Downloading: " +
+                                    (p.file ||
+                                        "model file");
+                            }
+
+
+                            /* FILE DONE */
+
+                            if(
+                                p.status ===
+                                "done"
+                            ){
+
+                                fileEl.textContent =
+                                    "Finished: " +
+                                    (p.file ||
+                                        "file");
+
+
+                                const done =
+                                    document.createElement(
+                                        "div"
+                                    );
+
+                                done.className =
+                                    "fileDone";
+
+                                done.textContent =
+                                    "✓ " +
+                                    (p.file ||
+                                        "file");
+
+                                if(
+                                    filesEl.textContent ===
+                                    "No files loaded yet."
+                                ){
+                                    filesEl.textContent =
+                                        "";
+                                }
+
+                                filesEl.appendChild(
+                                    done
+                                );
+                            }
+                        }
                 }
-            }
-        );
+            );
 
 
-        progressBar.style.width = "100%";
+        /* =================================
+           READY
+        ================================= */
 
-        progressText.textContent =
-            "Model loaded successfully.";
+        progressBar.style.width =
+            "100%";
+
+        percentEl.textContent =
+            "100%";
 
         statusEl.textContent =
             "Qwen3 Ready ✓";
 
-        setHeat("idle");
+        fileEl.textContent =
+            "All model files loaded.";
 
-        input.disabled = false;
-        send.disabled = false;
+        bytesEl.textContent =
+            "Model ready";
 
-        input.placeholder =
-            "Talk to Qwen...";
+        heat("loading");
+
+
+        input.disabled =
+            false;
+
+        send.disabled =
+            false;
 
         addMessage(
             "Qwen",
             "I'm ready. Ask me anything."
         );
 
-    } catch (error) {
+
+        setTimeout(
+            ()=>heat("idle"),
+            1000
+        );
+
+
+    }catch(error){
 
         console.error(error);
 
         statusEl.textContent =
-            "Qwen failed to load";
+            "Qwen3 failed to load";
 
-        progressText.textContent =
-            error.message || String(error);
-
-        setHeat("idle");
+        fileEl.textContent =
+            error.message ||
+            String(error);
 
         addMessage(
             "Qwen",
-            "I couldn't load the model. Check the error above."
+            "Model loading failed. See the loading message above."
         );
     }
 }
 
 
-/* =========================================================
-   SEND MESSAGE
-   ========================================================= */
+/* =========================================
+   SEND
+========================================= */
 
-async function sendMessage() {
+async function sendMessage(){
 
-    if (!generator || busy) return;
+    if(
+        !generator ||
+        busy
+    ){
+        return;
+    }
 
     const text =
         input.value.trim();
 
-    if (!text) return;
+    if(!text){
+        return;
+    }
 
     input.value = "";
 
     busy = true;
 
-    send.disabled = true;
-    input.disabled = true;
+    input.disabled =
+        true;
 
-    setHeat("working");
+    send.disabled =
+        true;
 
-    addMessage("You", text);
+    heat("working");
+
+    addMessage(
+        "You",
+        text
+    );
 
     messages.push({
-        role: "user",
-        content: text
+        role:"user",
+        content:text
     });
 
+    const answer =
+        addMessage(
+            "Qwen",
+            ""
+        );
 
-    const answerElement =
-        addMessage("Qwen", "");
 
-
-    try {
+    try{
 
         const output =
             await generator(
                 messages,
                 {
-                    max_new_tokens: 256,
-
-                    temperature: 0.7,
-
-                    do_sample: true,
-
-                    return_full_text: false
+                    max_new_tokens:256,
+                    do_sample:false,
+                    return_full_text:false
                 }
             );
 
 
-        let answer = "";
+        let result = "";
 
 
-        if (
-            Array.isArray(output) &&
-            output.length > 0
-        ) {
+        if(
+            output &&
+            output[0]
+        ){
 
-            const result =
-                output[0];
+            const generated =
+                output[0]
+                    .generated_text;
 
-            if (
-                result &&
-                typeof result.generated_text === "string"
-            ) {
 
-                answer =
-                    result.generated_text;
+            if(
+                typeof generated ===
+                "string"
+            ){
+
+                result =
+                    generated;
             }
 
-            /*
-             * Some Transformers.js versions can
-             * return generated_text as messages.
-             */
-            else if (
-                result &&
-                Array.isArray(result.generated_text)
-            ) {
+            else if(
+                Array.isArray(
+                    generated
+                )
+            ){
 
                 const last =
-                    result.generated_text[
-                        result.generated_text.length - 1
+                    generated[
+                        generated.length - 1
                     ];
 
-                if (
+                if(
                     last &&
-                    typeof last.content === "string"
-                ) {
+                    typeof last.content ===
+                    "string"
+                ){
 
-                    answer =
+                    result =
                         last.content;
                 }
             }
         }
 
 
-        if (!answer) {
-            answer =
-                "I generated an empty response.";
+        if(!result){
+            result =
+                "Qwen returned an empty response.";
         }
 
 
-        answerElement.textContent =
-            answer;
+        answer.textContent =
+            result;
 
 
         messages.push({
-            role: "assistant",
-            content: answer
+            role:"assistant",
+            content:result
         });
 
 
-    } catch (error) {
+    }catch(error){
 
         console.error(error);
 
-        answerElement.textContent =
+        answer.textContent =
             "Error: " +
-            (error.message || String(error));
+            (
+                error.message ||
+                String(error)
+            );
     }
 
 
-    setHeat("idle");
-
     busy = false;
 
-    send.disabled = false;
-    input.disabled = false;
+    input.disabled =
+        false;
+
+    send.disabled =
+        false;
+
+    heat("idle");
 
     input.focus();
 }
 
 
-/* =========================================================
-   BUTTON + ENTER
-   ========================================================= */
+/* =========================================
+   INPUT
+========================================= */
 
 send.addEventListener(
     "click",
@@ -698,12 +885,11 @@ send.addEventListener(
 
 input.addEventListener(
     "keydown",
-    (event) => {
+    (event)=>{
 
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ) {
+        if(
+            event.key === "Enter"
+        ){
 
             event.preventDefault();
 
@@ -713,9 +899,9 @@ input.addEventListener(
 );
 
 
-/* =========================================================
-   DRAGGABLE WINDOW
-   ========================================================= */
+/* =========================================
+   DRAG WINDOW
+========================================= */
 
 const app =
     document.getElementById("app");
@@ -732,110 +918,109 @@ let startLeft = 0;
 let startTop = 0;
 
 
-function pointerDown(event) {
-
-    dragging = true;
-
-    const rect =
-        app.getBoundingClientRect();
-
-    startX = event.clientX;
-    startY = event.clientY;
-
-    startLeft = rect.left;
-    startTop = rect.top;
-
-    app.style.transform = "none";
-
-    header.setPointerCapture(
-        event.pointerId
-    );
-}
-
-
-function pointerMove(event) {
-
-    if (!dragging) return;
-
-    const dx =
-        event.clientX - startX;
-
-    const dy =
-        event.clientY - startY;
-
-    let newLeft =
-        startLeft + dx;
-
-    let newTop =
-        startTop + dy;
-
-
-    const maxLeft =
-        window.innerWidth -
-        app.offsetWidth;
-
-    const maxTop =
-        window.innerHeight -
-        app.offsetHeight;
-
-
-    newLeft =
-        Math.max(
-            0,
-            Math.min(
-                maxLeft,
-                newLeft
-            )
-        );
-
-    newTop =
-        Math.max(
-            0,
-            Math.min(
-                maxTop,
-                newTop
-            )
-        );
-
-
-    app.style.left =
-        newLeft + "px";
-
-    app.style.top =
-        newTop + "px";
-}
-
-
-function pointerUp() {
-
-    dragging = false;
-}
-
-
 header.addEventListener(
     "pointerdown",
-    pointerDown
+    (event)=>{
+
+        dragging = true;
+
+        const rect =
+            app.getBoundingClientRect();
+
+        startX =
+            event.clientX;
+
+        startY =
+            event.clientY;
+
+        startLeft =
+            rect.left;
+
+        startTop =
+            rect.top;
+
+        app.style.transform =
+            "none";
+
+        header.setPointerCapture(
+            event.pointerId
+        );
+    }
 );
+
 
 header.addEventListener(
     "pointermove",
-    pointerMove
+    (event)=>{
+
+        if(!dragging){
+            return;
+        }
+
+        const dx =
+            event.clientX -
+            startX;
+
+        const dy =
+            event.clientY -
+            startY;
+
+        let left =
+            startLeft + dx;
+
+        let top =
+            startTop + dy;
+
+
+        left =
+            Math.max(
+                0,
+                Math.min(
+                    window.innerWidth -
+                    app.offsetWidth,
+                    left
+                )
+            );
+
+
+        top =
+            Math.max(
+                0,
+                Math.min(
+                    window.innerHeight -
+                    app.offsetHeight,
+                    top
+                )
+            );
+
+
+        app.style.left =
+            left + "px";
+
+        app.style.top =
+            top + "px";
+    }
 );
+
 
 header.addEventListener(
     "pointerup",
-    pointerUp
+    ()=>{
+        dragging = false;
+    }
 );
 
 header.addEventListener(
     "pointercancel",
-    pointerUp
+    ()=>{
+        dragging = false;
+    }
 );
 
 
-/* =========================================================
+/* =========================================
    START
-   ========================================================= */
+========================================= */
 
 loadAI();
 
