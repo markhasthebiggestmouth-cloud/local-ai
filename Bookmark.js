@@ -1,20 +1,16 @@
 (() => {
-  // =========================
-  // REMOVE OLD INSTANCE
-  // =========================
-
   const OLD = document.getElementById("qwen-floating-chat");
 
   if (OLD) {
     OLD.remove();
   }
 
-  // Remove old shortcut listener if one exists
-  if (window.__QWEN_CMD_E_HANDLER__) {
+  if (window.__QWEN_SHORTCUT__) {
     document.removeEventListener(
       "keydown",
-      window.__QWEN_CMD_E_HANDLER__
+      window.__QWEN_SHORTCUT__
     );
+    window.__QWEN_SHORTCUT__ = null;
   }
 
   const MODEL = "onnx-community/Qwen3-0.6B-ONNX";
@@ -32,21 +28,21 @@
   box.id = "qwen-floating-chat";
 
   box.style.cssText = `
-    position: fixed;
-    width: 300px;
-    height: 300px;
-    right: 20px;
-    bottom: 20px;
-    background: #ffffff;
-    color: #111111;
-    z-index: 2147483647;
-    border: 1px solid #dddddd;
-    border-radius: 14px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.18);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    position:fixed;
+    width:300px;
+    height:300px;
+    right:20px;
+    bottom:20px;
+    background:#fff;
+    color:#111;
+    z-index:2147483647;
+    border:1px solid #ddd;
+    border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.18);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
   `;
 
   box.innerHTML = `
@@ -54,7 +50,7 @@
       style="
         height:40px;
         min-height:40px;
-        border-bottom:1px solid #eeeeee;
+        border-bottom:1px solid #eee;
         display:flex;
         align-items:center;
         justify-content:space-between;
@@ -64,10 +60,7 @@
         user-select:none;
       "
     >
-      <div style="
-        font-size:14px;
-        font-weight:600;
-      ">
+      <div style="font-size:14px;font-weight:600;">
         Qwen
       </div>
 
@@ -80,7 +73,6 @@
           cursor:pointer;
           width:28px;
           height:28px;
-          border-radius:7px;
         "
       >×</button>
     </div>
@@ -90,7 +82,7 @@
         font-size:11px;
         color:#777;
         padding:6px 10px;
-        border-bottom:1px solid #eeeeee;
+        border-bottom:1px solid #eee;
       "
     >
       Loading Qwen3...
@@ -102,13 +94,13 @@
         overflow-y:auto;
         padding:10px;
         box-sizing:border-box;
-        background:#ffffff;
+        background:#fff;
       "
     ></div>
 
     <div
       style="
-        border-top:1px solid #eeeeee;
+        border-top:1px solid #eee;
         padding:8px;
         display:flex;
         gap:6px;
@@ -124,13 +116,13 @@
           flex:1;
           min-width:0;
           height:32px;
-          border:1px solid #dddddd;
+          border:1px solid #ddd;
           border-radius:9px;
           padding:0 10px;
           outline:none;
           font-size:13px;
-          color:#111111;
-          background:#ffffff;
+          color:#111;
+          background:#fff;
           box-sizing:border-box;
         "
       />
@@ -143,8 +135,8 @@
           height:32px;
           border:0;
           border-radius:9px;
-          background:#111111;
-          color:#ffffff;
+          background:#111;
+          color:#fff;
           cursor:pointer;
           font-size:16px;
         "
@@ -162,10 +154,11 @@
   const send = document.getElementById("qwen-send");
 
   // =========================
-  // ADD MESSAGE
+  // MESSAGES
   // =========================
 
   function addMessage(name, text) {
+
     const wrapper = document.createElement("div");
 
     wrapper.style.cssText = `
@@ -182,7 +175,7 @@
     nameEl.style.cssText = `
       font-size:11px;
       font-weight:600;
-      color:${name === "You" ? "#777777" : "#111111"};
+      color:${name === "You" ? "#777" : "#111"};
       margin-bottom:2px;
     `;
 
@@ -191,7 +184,7 @@
     textEl.textContent = text;
 
     textEl.style.cssText = `
-      color:#222222;
+      color:#222;
       white-space:pre-wrap;
     `;
 
@@ -230,8 +223,8 @@
         "text-generation",
         MODEL,
         {
-          device: "webgpu",
-          dtype: "q4f16"
+          device:"webgpu",
+          dtype:"q4f16"
         }
       );
 
@@ -291,8 +284,8 @@
     addMessage("You", question);
 
     messages.push({
-      role: "user",
-      content: question
+      role:"user",
+      content:question
     });
 
     const answer = addMessage("Qwen", "");
@@ -302,9 +295,9 @@
       const output = await generator(
         messages,
         {
-          max_new_tokens: 256,
-          do_sample: false,
-          return_full_text: false
+          max_new_tokens:256,
+          do_sample:false,
+          return_full_text:false
         }
       );
 
@@ -340,8 +333,8 @@
       answer.textContent = result;
 
       messages.push({
-        role: "assistant",
-        content: result
+        role:"assistant",
+        content:result
       });
 
     } catch (error) {
@@ -391,16 +384,17 @@
   close.addEventListener(
     "click",
     () => {
+
       box.remove();
 
-      if (window.__QWEN_CMD_E_HANDLER__) {
+      if (window.__QWEN_SHORTCUT__) {
 
         document.removeEventListener(
           "keydown",
-          window.__QWEN_CMD_E_HANDLER__
+          window.__QWEN_SHORTCUT__
         );
 
-        window.__QWEN_CMD_E_HANDLER__ = null;
+        window.__QWEN_SHORTCUT__ = null;
       }
     }
   );
@@ -462,18 +456,18 @@
   );
 
   // =========================
-  // CMD + E
+  // CMD + SHIFT + Q
   // =========================
 
-  const cmdEHandler = (event) => {
+  const shortcutHandler = (event) => {
 
     if (
       event.metaKey &&
-      event.key.toLowerCase() === "e"
+      event.shiftKey &&
+      event.key.toLowerCase() === "q"
     ) {
 
       event.preventDefault();
-      event.stopPropagation();
 
       if (box.style.visibility === "hidden") {
 
@@ -487,19 +481,15 @@
     }
   };
 
-  // Save handler globally so we can
-  // remove it next time the bookmarklet runs.
-
-  window.__QWEN_CMD_E_HANDLER__ =
-    cmdEHandler;
+  window.__QWEN_SHORTCUT__ = shortcutHandler;
 
   document.addEventListener(
     "keydown",
-    cmdEHandler
+    shortcutHandler
   );
 
   // =========================
-  // START
+  // START QWEN
   // =========================
 
   loadAI();
