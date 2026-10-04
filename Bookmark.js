@@ -1,10 +1,12 @@
 (() => {
-  const OLD = document.getElementById("qwen-floating-chat");
+  // Remove previous Qwen window
+  const old = document.getElementById("qwen-floating-chat");
 
-  if (OLD) {
-    OLD.remove();
+  if (old) {
+    old.remove();
   }
 
+  // Remove previous shortcut
   if (window.__QWEN_SHORTCUT__) {
     document.removeEventListener(
       "keydown",
@@ -33,16 +35,17 @@
     height:300px;
     right:20px;
     bottom:20px;
-    background:#fff;
-    color:#111;
+    background:#ffffff;
+    color:#111111;
     z-index:2147483647;
-    border:1px solid #ddd;
+    border:1px solid #dddddd;
     border-radius:14px;
     box-shadow:0 8px 30px rgba(0,0,0,.18);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     display:flex;
     flex-direction:column;
     overflow:hidden;
+    user-select:none;
   `;
 
   box.innerHTML = `
@@ -50,7 +53,7 @@
       style="
         height:40px;
         min-height:40px;
-        border-bottom:1px solid #eee;
+        border-bottom:1px solid #eeeeee;
         display:flex;
         align-items:center;
         justify-content:space-between;
@@ -58,9 +61,14 @@
         box-sizing:border-box;
         cursor:grab;
         user-select:none;
+        touch-action:none;
       "
     >
-      <div style="font-size:14px;font-weight:600;">
+      <div style="
+        font-size:14px;
+        font-weight:600;
+        pointer-events:none;
+      ">
         Qwen
       </div>
 
@@ -73,6 +81,7 @@
           cursor:pointer;
           width:28px;
           height:28px;
+          border-radius:7px;
         "
       >×</button>
     </div>
@@ -82,7 +91,8 @@
         font-size:11px;
         color:#777;
         padding:6px 10px;
-        border-bottom:1px solid #eee;
+        border-bottom:1px solid #eeeeee;
+        user-select:none;
       "
     >
       Loading Qwen3...
@@ -94,13 +104,14 @@
         overflow-y:auto;
         padding:10px;
         box-sizing:border-box;
-        background:#fff;
+        background:#ffffff;
+        user-select:text;
       "
     ></div>
 
     <div
       style="
-        border-top:1px solid #eee;
+        border-top:1px solid #eeeeee;
         padding:8px;
         display:flex;
         gap:6px;
@@ -116,14 +127,15 @@
           flex:1;
           min-width:0;
           height:32px;
-          border:1px solid #ddd;
+          border:1px solid #dddddd;
           border-radius:9px;
           padding:0 10px;
           outline:none;
           font-size:13px;
-          color:#111;
-          background:#fff;
+          color:#111111;
+          background:#ffffff;
           box-sizing:border-box;
+          user-select:text;
         "
       />
 
@@ -135,8 +147,8 @@
           height:32px;
           border:0;
           border-radius:9px;
-          background:#111;
-          color:#fff;
+          background:#111111;
+          color:#ffffff;
           cursor:pointer;
           font-size:16px;
         "
@@ -186,12 +198,14 @@
     textEl.style.cssText = `
       color:#222;
       white-space:pre-wrap;
+      user-select:text;
     `;
 
     wrapper.appendChild(nameEl);
     wrapper.appendChild(textEl);
 
     chat.appendChild(wrapper);
+
     chat.scrollTop = chat.scrollHeight;
 
     return textEl;
@@ -223,8 +237,8 @@
         "text-generation",
         MODEL,
         {
-          device:"webgpu",
-          dtype:"q4f16"
+          device: "webgpu",
+          dtype: "q4f16"
         }
       );
 
@@ -246,7 +260,8 @@
 
       console.error(error);
 
-      status.textContent = "Qwen failed to load";
+      status.textContent =
+        "Qwen failed to load";
 
       chat.innerHTML = "";
 
@@ -284,20 +299,23 @@
     addMessage("You", question);
 
     messages.push({
-      role:"user",
-      content:question
+      role: "user",
+      content: question
     });
 
-    const answer = addMessage("Qwen", "");
+    const answer = addMessage(
+      "Qwen",
+      ""
+    );
 
     try {
 
       const output = await generator(
         messages,
         {
-          max_new_tokens:256,
-          do_sample:false,
-          return_full_text:false
+          max_new_tokens: 256,
+          do_sample: false,
+          return_full_text: false
         }
       );
 
@@ -327,14 +345,15 @@
       }
 
       if (!result) {
-        result = "Qwen returned an empty response.";
+        result =
+          "Qwen returned an empty response.";
       }
 
       answer.textContent = result;
 
       messages.push({
-        role:"assistant",
-        content:result
+        role: "assistant",
+        content: result
       });
 
     } catch (error) {
@@ -373,7 +392,6 @@
 
         askQwen();
       }
-
     }
   );
 
@@ -404,49 +422,100 @@
   // =========================
 
   let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
 
   header.addEventListener(
-    "mousedown",
+    "pointerdown",
     (event) => {
 
+      // Don't drag when clicking close
+      if (event.target === close) {
+        return;
+      }
+
       dragging = true;
+
+      header.setPointerCapture(
+        event.pointerId
+      );
 
       const rect =
         box.getBoundingClientRect();
 
-      offsetX =
+      dragOffsetX =
         event.clientX - rect.left;
 
-      offsetY =
+      dragOffsetY =
         event.clientY - rect.top;
 
+      box.style.right = "auto";
+      box.style.bottom = "auto";
+
       header.style.cursor = "grabbing";
+
+      event.preventDefault();
     }
   );
 
-  document.addEventListener(
-    "mousemove",
+  header.addEventListener(
+    "pointermove",
     (event) => {
 
       if (!dragging) {
         return;
       }
 
+      let newX =
+        event.clientX - dragOffsetX;
+
+      let newY =
+        event.clientY - dragOffsetY;
+
+      // Keep the window on screen
+
+      const maxX =
+        window.innerWidth - box.offsetWidth;
+
+      const maxY =
+        window.innerHeight - box.offsetHeight;
+
+      newX = Math.max(
+        0,
+        Math.min(newX, maxX)
+      );
+
+      newY = Math.max(
+        0,
+        Math.min(newY, maxY)
+      );
+
       box.style.left =
-        (event.clientX - offsetX) + "px";
+        newX + "px";
 
       box.style.top =
-        (event.clientY - offsetY) + "px";
-
-      box.style.right = "auto";
-      box.style.bottom = "auto";
+        newY + "px";
     }
   );
 
-  document.addEventListener(
-    "mouseup",
+  header.addEventListener(
+    "pointerup",
+    (event) => {
+
+      dragging = false;
+
+      try {
+        header.releasePointerCapture(
+          event.pointerId
+        );
+      } catch (_) {}
+
+      header.style.cursor = "grab";
+    }
+  );
+
+  header.addEventListener(
+    "pointercancel",
     () => {
 
       dragging = false;
@@ -456,32 +525,45 @@
   );
 
   // =========================
-  // CMD + SHIFT + Q
+  // OPTION + SHIFT + Q
   // =========================
+  //
+  // On Mac:
+  // Option = event.altKey
+  //
+  // This avoids CMD+SHIFT+Q,
+  // which can quit Chrome.
+  //
 
   const shortcutHandler = (event) => {
 
     if (
-      event.metaKey &&
+      event.altKey &&
       event.shiftKey &&
       event.key.toLowerCase() === "q"
     ) {
 
       event.preventDefault();
+      event.stopPropagation();
 
-      if (box.style.visibility === "hidden") {
+      if (
+        box.style.visibility ===
+        "hidden"
+      ) {
 
-        box.style.visibility = "visible";
+        box.style.visibility =
+          "visible";
 
       } else {
 
-        box.style.visibility = "hidden";
-
+        box.style.visibility =
+          "hidden";
       }
     }
   };
 
-  window.__QWEN_SHORTCUT__ = shortcutHandler;
+  window.__QWEN_SHORTCUT__ =
+    shortcutHandler;
 
   document.addEventListener(
     "keydown",
@@ -489,7 +571,7 @@
   );
 
   // =========================
-  // START QWEN
+  // START
   // =========================
 
   loadAI();
