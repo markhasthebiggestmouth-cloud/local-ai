@@ -271,10 +271,6 @@
 
     addMessage("You", question);
 
-    // IMPORTANT:
-    // Qwen receives the conversation history,
-    // just like the working index.html.
-
     messages.push({
       role: "user",
       content: question
@@ -322,9 +318,6 @@
       }
 
       answer.textContent = result;
-
-      // Save Qwen's response so the next
-      // question remembers the conversation.
 
       messages.push({
         role: "assistant",
@@ -412,6 +405,32 @@
     dragging = false;
 
     header.style.cursor = "grab";
+  });
+
+  // =========================
+  // CMD + E HIDE / SHOW
+  // =========================
+
+  document.addEventListener("keydown", (event) => {
+
+    if (
+      event.metaKey &&
+      event.key.toLowerCase() === "e"
+    ) {
+
+      event.preventDefault();
+
+      if (box.style.display === "none") {
+
+        box.style.display = "flex";
+
+      } else {
+
+        box.style.display = "none";
+
+      }
+    }
+
   });
 
   // =========================
