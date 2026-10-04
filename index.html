@@ -1,98 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Local AI</title>
 
 <style>
-html, body {
+* {
+    box-sizing: border-box;
+}
+
+body {
     margin: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: transparent;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 #chat {
     position: fixed;
-    width: 300px;
-    height: 300px;
     left: 20px;
     top: 20px;
+
+    width: 300px;
+    height: 300px;
+
     background: #181818;
     color: white;
+
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 8px 30px rgba(0,0,0,.35);
+
+    box-shadow: 0 10px 35px rgba(0,0,0,.4);
+
     display: flex;
     flex-direction: column;
 }
 
-#title {
+#top {
     height: 42px;
-    background: #252525;
+    min-height: 42px;
+
+    background: #242424;
+
     display: flex;
     align-items: center;
+
     padding: 0 12px;
-    font-weight: bold;
-    cursor: move;
+
+    cursor: grab;
     user-select: none;
+}
+
+#top:active {
+    cursor: grabbing;
+}
+
+#name {
+    font-weight: 700;
+    font-size: 14px;
 }
 
 #status {
     margin-left: auto;
-    font-size: 11px;
-    color: #aaa;
+    font-size: 10px;
+    color: #999;
 }
 
 #messages {
     flex: 1;
+
     overflow-y: auto;
+
     padding: 8px;
-    font-size: 13px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.msg {
-    margin: 6px 0;
+.message {
+    max-width: 90%;
+
     padding: 7px 9px;
+
     border-radius: 10px;
+
+    font-size: 13px;
+
+    line-height: 1.35;
+
     white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
 }
 
 .user {
-    background: #3b82f6;
-    margin-left: 25px;
+    align-self: flex-end;
+    background: #3478f6;
 }
 
 .ai {
+    align-self: flex-start;
     background: #292929;
-    margin-right: 25px;
 }
 
-#bottom {
+#inputArea {
     display: flex;
-    padding: 7px;
+
     gap: 5px;
+
+    padding: 7px;
+
     background: #222;
 }
 
 #input {
+    min-width: 0;
     flex: 1;
+
     border: none;
     outline: none;
+
     border-radius: 9px;
+
     padding: 8px;
+
     background: #333;
     color: white;
 }
 
+#input::placeholder {
+    color: #888;
+}
+
 #send {
-    width: 45px;
+    width: 42px;
+
     border: none;
+
     border-radius: 9px;
-    background: #3b82f6;
+
+    background: #3478f6;
+
     color: white;
-    font-size: 18px;
+
+    font-size: 17px;
+}
+
+#send:disabled {
+    opacity: .4;
 }
 </style>
 </head>
@@ -101,18 +160,29 @@ html, body {
 
 <div id="chat">
 
-    <div id="title">
-        🤖 Local AI
+    <div id="top">
+        <span id="name">🤖 Local AI</span>
         <span id="status">Loading...</span>
     </div>
 
     <div id="messages">
-        <div class="msg ai">Loading local AI...</div>
+        <div class="message ai">
+            Loading Qwen3...
+        </div>
     </div>
 
-    <div id="bottom">
-        <input id="input" placeholder="Ask me something..." disabled>
-        <button id="send" disabled>➤</button>
+    <div id="inputArea">
+
+        <input
+            id="input"
+            placeholder="Ask something..."
+            disabled
+        >
+
+        <button id="send" disabled>
+            ➤
+        </button>
+
     </div>
 
 </div>
@@ -129,19 +199,26 @@ const input = document.getElementById("input");
 const send = document.getElementById("send");
 const status = document.getElementById("status");
 
-let generator;
-let history = [];
+let generator = null;
+
+let conversation = [];
 
 function addMessage(text, type) {
-    const div = document.createElement("div");
-    div.className = "msg " + type;
-    div.textContent = text;
-    messages.appendChild(div);
+
+    const message = document.createElement("div");
+
+    message.className = "message " + type;
+
+    message.textContent = text;
+
+    messages.appendChild(message);
+
     messages.scrollTop = messages.scrollHeight;
-    return div;
+
+    return message;
 }
 
-async function startAI() {
+async function loadAI() {
 
     try {
 
@@ -151,165 +228,202 @@ async function startAI() {
             "text-generation",
             "onnx-community/Qwen3-0.6B-ONNX",
             {
-                device: "webgpu",
-                dtype: "q4f16"
+                device: "webgpu"
             }
         );
 
         status.textContent = "Ready";
 
         messages.innerHTML = "";
+
         addMessage(
-            "I'm ready! Ask me anything.",
+            "Qwen3 is ready. Ask me anything!",
             "ai"
         );
 
         input.disabled = false;
         send.disabled = false;
+
         input.focus();
 
     } catch (error) {
 
-        status.textContent = "Error";
+        console.error(error);
+
+        status.textContent = "Failed";
 
         messages.innerHTML = "";
 
         addMessage(
-            "Couldn't load the local AI.\n\n" +
-            error,
+            "AI failed to load.\n\n" +
+            error.message,
             "ai"
         );
 
-        console.error(error);
     }
 }
 
-async function askAI() {
+async function ask() {
 
-    const text = input.value.trim();
+    const question = input.value.trim();
 
-    if (!text || !generator) return;
+    if (!question || !generator) {
+        return;
+    }
 
     input.value = "";
+
     input.disabled = true;
     send.disabled = true;
 
-    addMessage(text, "user");
+    addMessage(question, "user");
 
-    history.push({
+    conversation.push({
         role: "user",
-        content: text
+        content: question
     });
 
-    const responseBox = addMessage("", "ai");
+    const answerBox = addMessage("", "ai");
 
     try {
 
-        const output = await generator(history, {
-            max_new_tokens: 256,
-            temperature: 0.7,
-            do_sample: true,
-            streamer: new TextStreamer(
-                generator.tokenizer,
-                {
-                    skip_prompt: true,
-                    callback_function: (token) => {
-                        responseBox.textContent += token;
-                        messages.scrollTop = messages.scrollHeight;
-                    }
+        const streamer = new TextStreamer(
+            generator.tokenizer,
+            {
+                skip_prompt: true,
+
+                callback_function: (token) => {
+
+                    answerBox.textContent += token;
+
+                    messages.scrollTop =
+                        messages.scrollHeight;
                 }
-            )
-        });
+            }
+        );
 
-        let answer = "";
+        const result = await generator(
+            conversation,
+            {
+                max_new_tokens: 256,
 
-        if (
-            output &&
-            output[0] &&
-            output[0].generated_text
-        ) {
-            const generated = output[0].generated_text;
+                temperature: 0.7,
 
-            if (Array.isArray(generated)) {
-                const last = generated[generated.length - 1];
+                do_sample: true,
 
-                if (last && last.content) {
-                    answer = last.content;
-                }
-            } else {
-                answer = generated;
+                streamer: streamer
+            }
+        );
+
+        if (!answerBox.textContent.trim()) {
+
+            const generated =
+                result?.[0]?.generated_text;
+
+            if (typeof generated === "string") {
+
+                answerBox.textContent =
+                    generated;
             }
         }
 
-        if (answer && !responseBox.textContent) {
-            responseBox.textContent = answer;
-        }
-
-        history.push({
+        conversation.push({
             role: "assistant",
-            content: responseBox.textContent
+            content: answerBox.textContent
         });
 
     } catch (error) {
 
-        responseBox.textContent =
-            "Error: " + error;
-
-    } finally {
-
-        input.disabled = false;
-        send.disabled = false;
-        input.focus();
+        answerBox.textContent =
+            "Error: " + error.message;
 
     }
+
+    input.disabled = false;
+    send.disabled = false;
+
+    input.focus();
 }
 
-send.onclick = askAI;
+send.addEventListener(
+    "click",
+    ask
+);
 
-input.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-        askAI();
+input.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Enter") {
+            ask();
+        }
+
     }
-});
-
-startAI();
+);
 
 
-// DRAG WINDOW
+// -------------------------
+// DRAGGABLE WINDOW
+// -------------------------
 
-const chat = document.getElementById("chat");
-const title = document.getElementById("title");
+const chat =
+    document.getElementById("chat");
+
+const top =
+    document.getElementById("top");
 
 let dragging = false;
+
 let offsetX = 0;
 let offsetY = 0;
 
-title.addEventListener("pointerdown", e => {
+top.addEventListener(
+    "pointerdown",
+    event => {
 
-    dragging = true;
+        dragging = true;
 
-    const rect = chat.getBoundingClientRect();
+        const rect =
+            chat.getBoundingClientRect();
 
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
+        offsetX =
+            event.clientX - rect.left;
 
-    title.setPointerCapture(e.pointerId);
-});
+        offsetY =
+            event.clientY - rect.top;
 
-title.addEventListener("pointermove", e => {
+        top.setPointerCapture(
+            event.pointerId
+        );
+    }
+);
 
-    if (!dragging) return;
+top.addEventListener(
+    "pointermove",
+    event => {
 
-    chat.style.left =
-        (e.clientX - offsetX) + "px";
+        if (!dragging) return;
 
-    chat.style.top =
-        (e.clientY - offsetY) + "px";
-});
+        chat.style.left =
+            (event.clientX - offsetX) + "px";
 
-title.addEventListener("pointerup", () => {
-    dragging = false;
-});
+        chat.style.top =
+            (event.clientY - offsetY) + "px";
+    }
+);
+
+top.addEventListener(
+    "pointerup",
+    () => {
+
+        dragging = false;
+    }
+);
+
+
+// START AI
+
+loadAI();
 
 </script>
 
