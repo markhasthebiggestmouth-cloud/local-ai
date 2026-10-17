@@ -1,4 +1,13 @@
+
 (() => {
+  // Close a previous Qwen PiP window if this script is run again.
+  if (window.__QWEN_PIP_WINDOW__ && !window.__QWEN_PIP_WINDOW__.closed) {
+    try {
+      window.__QWEN_PIP_WINDOW__.close();
+    } catch (_) {}
+    window.__QWEN_PIP_WINDOW__ = null;
+  }
+
   // Remove previous Qwen window
   const old = document.getElementById("qwen-floating-chat");
 
@@ -20,6 +29,8 @@
   let generator = null;
   let busy = false;
   let messages = [];
+  let pipWindow = null;
+  const originalDocument = document;
 
   // =========================
   // CREATE GUI
@@ -72,18 +83,35 @@
         Qwen
       </div>
 
-      <button id="qwen-close"
-        style="
-          border:0;
-          background:transparent;
-          font-size:20px;
-          color:#777;
-          cursor:pointer;
-          width:28px;
-          height:28px;
-          border-radius:7px;
-        "
-      >×</button>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button id="qwen-pip"
+          title="Open floating Picture-in-Picture chat"
+          aria-label="Open floating chat"
+          style="
+            border:0;
+            background:transparent;
+            font-size:16px;
+            color:#777;
+            cursor:pointer;
+            width:28px;
+            height:28px;
+            border-radius:7px;
+          "
+        >⧉</button>
+
+        <button id="qwen-close"
+          style="
+            border:0;
+            background:transparent;
+            font-size:20px;
+            color:#777;
+            cursor:pointer;
+            width:28px;
+            height:28px;
+            border-radius:7px;
+          "
+        >×</button>
+      </div>
     </div>
 
     <div id="qwen-status"
@@ -160,6 +188,7 @@
 
   const header = document.getElementById("qwen-header");
   const close = document.getElementById("qwen-close");
+  const pipButton = document.getElementById("qwen-pip");
   const status = document.getElementById("qwen-status");
   const chat = document.getElementById("qwen-chat");
   const input = document.getElementById("qwen-input");
@@ -403,6 +432,12 @@
     "click",
     () => {
 
+      if (pipWindow && !pipWindow.closed) {
+        try {
+          pipWindow.close();
+        } catch (_) {}
+      }
+
       box.remove();
 
       if (window.__QWEN_SHORTCUT__) {
@@ -418,6 +453,89 @@
   );
 
   // =========================
+  // PICTURE-IN-PICTURE
+  // =========================
+
+  pipButton.addEventListener("click", async () => {
+    if (!("documentPictureInPicture" in window)) {
+      status.textContent =
+        "PiP needs a recent desktop Chrome or Edge browser.";
+      return;
+    }
+
+    if (pipWindow && !pipWindow.closed) {
+      pipWindow.focus();
+      return;
+    }
+
+    try {
+      // The click is a direct user gesture, as browsers require.
+      const pip = await window.documentPictureInPicture.requestWindow({
+        width: 340,
+        height: 340
+      });
+
+      pipWindow = pip;
+      window.__QWEN_PIP_WINDOW__ = pip;
+
+      // The UI uses inline styles, so its original appearance is preserved.
+      pip.document.documentElement.style.cssText =
+        "width:100%;height:100%;overflow:hidden;background:#fff;";
+
+      pip.document.body.style.cssText =
+        "margin:0;width:100%;height:100%;overflow:hidden;background:#fff;";
+
+      // Move the existing GUI instead of cloning it. This preserves its
+      // event handlers, current chat, and the loaded model.
+      pip.document.body.appendChild(box);
+
+      // Keep the original 300x300 layout with 20px around it.
+      box.style.position = "fixed";
+      box.style.width = "300px";
+      box.style.height = "300px";
+      box.style.right = "20px";
+      box.style.bottom = "20px";
+      box.style.left = "auto";
+      box.style.top = "auto";
+
+      status.textContent = generator
+        ? "Qwen3 Ready ✓"
+        : "Loading Qwen3...";
+
+      input.focus();
+
+      pip.addEventListener("pagehide", () => {
+        if (pipWindow === pip) {
+          pipWindow = null;
+        }
+
+        if (window.__QWEN_PIP_WINDOW__ === pip) {
+          window.__QWEN_PIP_WINDOW__ = null;
+        }
+
+        // Return the same GUI to the original page when PiP closes.
+        if (originalDocument.body) {
+          originalDocument.body.appendChild(box);
+
+          box.style.position = "fixed";
+          box.style.width = "300px";
+          box.style.height = "300px";
+          box.style.right = "20px";
+          box.style.bottom = "20px";
+          box.style.left = "auto";
+          box.style.top = "auto";
+          box.style.borderRadius = "14px";
+        }
+      }, { once: true });
+
+    } catch (error) {
+      console.error("Qwen PiP failed:", error);
+      status.textContent =
+        "Couldn't open PiP: " + (error.message || String(error));
+    }
+  });
+
+  // =========================
   // DRAGGING
   // =========================
 
@@ -429,8 +547,13 @@
     "pointerdown",
     (event) => {
 
-      // Don't drag when clicking close
-      if (event.target === close) {
+      // Don't drag when clicking a header button.
+      if (event.target.closest("button")) {
+        return;
+      }
+
+      // The PiP window is moved by the browser itself.
+      if (box.ownerDocument !== originalDocument) {
         return;
       }
 
