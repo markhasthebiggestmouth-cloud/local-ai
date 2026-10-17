@@ -1,759 +1,513 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Local Qwen AI V7</title>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: white;
-}
-
-/* V7 BACKDROP */
-body {
-  background:
-    radial-gradient(
-      circle at 50% 15%,
-      rgba(90, 35, 35, 0.55),
-      transparent 38%
-    ),
-    linear-gradient(
-      145deg,
-      #090909,
-      #171010 55%,
-      #050505
-    );
-}
-
-/* MAIN WINDOW */
-#app {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-
-  left: 50%;
-  top: 50%;
-
-  transform: translate(-50%, -50%);
-
-  background: rgba(10, 10, 10, 0.96);
-
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-
-  overflow: hidden;
-}
-
-/* TOP BAR */
-#header {
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-
-  padding: 0 12px;
-
-  background: rgba(255, 255, 255, 0.055);
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
-  cursor: grab;
-
-  user-select: none;
-  touch-action: none;
-}
-
-#header:active {
-  cursor: grabbing;
-}
-
-#dot {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #b83a3a;
-
-  margin-right: 8px;
-}
-
-#title {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-#version {
-  margin-left: auto;
-
-  font-size: 9px;
-
-  opacity: 0.4;
-}
-
-/* STATUS */
-#statusArea {
-  padding: 10px 12px 4px;
-}
-
-#status {
-  font-size: 11px;
-
-  margin-bottom: 3px;
-
-  color: #e2e8f0;
-}
-
-#file {
-  font-size: 9px;
-
-  color: #94a3b8;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-}
-
-/* CHAT */
-#chat {
-  position: absolute;
-
-  top: 72px;
-  bottom: 48px;
-
-  left: 0;
-  right: 0;
-
-  padding: 7px 11px;
-
-  overflow-y: auto;
-
-  font-size: 11px;
-}
-
-.msg {
-  margin-bottom: 8px;
-
-  line-height: 1.4;
-
-  white-space: pre-wrap;
-
-  word-break: break-word;
-}
-
-.user {
-  color: #f0b4b4;
-}
-
-.bot {
-  color: #e2e8f0;
-}
-
-.label {
-  font-weight: 700;
-}
-
-/* INPUT */
-#inputArea {
-  position: absolute;
-
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-
-  display: flex;
-
-  gap: 6px;
-}
-
-#input {
-  flex: 1;
-
-  min-width: 0;
-
-  height: 32px;
-
-  padding: 0 9px;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
-  border-radius: 9px;
-
-  background: rgba(255, 255, 255, 0.06);
-
-  color: white;
-
-  outline: none;
-
-  font-size: 11px;
-}
-
-#send {
-  width: 48px;
-
-  border: 0;
-
-  border-radius: 9px;
-
-  background: #8f3434;
-
-  color: white;
-
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-#send:disabled {
-  opacity: 0.4;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qwen AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f7f7f8;
+      color: #202123;
+      font-family: Arial, sans-serif;
+    }
+
+    #qwen-window {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 340px;
+      height: 440px;
+      max-width: calc(100vw - 24px);
+      max-height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: white;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px #00000018;
+      z-index: 1000;
+      animation: appear .25s ease-out;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #qwen-header {
+      height: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid #eee;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #qwen-header:active {
+      cursor: grabbing;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    #qwen-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #aaa;
+    }
+
+    #qwen-dot.ready {
+      background: #22c55e;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .header-actions button {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #333;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .header-actions button:hover {
+      background: #f0f0f0;
+    }
+
+    #qwen-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: 94%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #f0f0f0;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      border: 1px solid #eee;
+      background: white;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.error {
+      color: #b42318;
+      background: #fff1f0;
+      border-color: #ffd5d2;
+    }
+
+    #qwen-status {
+      padding: 7px 12px;
+      min-height: 28px;
+      border-top: 1px solid #f3f3f3;
+      color: #777;
+      font-size: 11px;
+    }
+
+    #qwen-form {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      padding: 9px;
+      border-top: 1px solid #eee;
+    }
+
+    #qwen-input {
+      flex: 1;
+      min-width: 0;
+      height: 42px;
+      max-height: 100px;
+      resize: none;
+      padding: 11px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      outline: none;
+      font: 13px Arial, sans-serif;
+      background: white;
+      color: #202123;
+    }
+
+    #qwen-input:focus {
+      border-color: #999;
+    }
+
+    #qwen-send {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border: 0;
+      border-radius: 12px;
+      background: #202123;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    #qwen-send:disabled {
+      opacity: .45;
+      cursor: wait;
+    }
+
+    #qwen-window button:focus-visible,
+    #qwen-input:focus-visible {
+      outline: 2px solid #777;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 420px) {
+      #qwen-window {
+        right: 12px;
+        bottom: 12px;
+        width: 340px;
+        height: min(440px, calc(100vh - 24px));
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <section id="qwen-window">
+    <header id="qwen-header">
+      <div class="brand">
+        <span id="qwen-dot"></span>
+        <span>Qwen AI</span>
+      </div>
 
-<div id="app">
+      <div class="header-actions">
+        <button id="qwen-clear" title="Clear chat"
+          aria-label="Clear chat">↻</button>
+        <button id="qwen-close" title="Hide chat"
+          aria-label="Hide chat">×</button>
+      </div>
+    </header>
 
-  <div id="header">
-    <div id="dot"></div>
+    <div id="qwen-messages" aria-live="polite"></div>
 
-    <div id="title">
-      Local Qwen AI
-    </div>
+    <div id="qwen-status">Starting Qwen…</div>
 
-    <div id="version">
-      V7
-    </div>
-  </div>
+    <form id="qwen-form">
+      <textarea id="qwen-input" rows="1"
+        placeholder="Message Qwen…"
+        aria-label="Message Qwen"></textarea>
 
-  <div id="statusArea">
+      <button id="qwen-send" type="submit"
+        aria-label="Send message">↑</button>
+    </form>
+  </section>
 
-    <div id="status">
-      Starting local AI...
-    </div>
+  <script type="module">
+    const box = document.getElementById("qwen-window");
+    const header = document.getElementById("qwen-header");
+    const messagesEl = document.getElementById("qwen-messages");
+    const statusEl = document.getElementById("qwen-status");
+    const dot = document.getElementById("qwen-dot");
+    const form = document.getElementById("qwen-form");
+    const input = document.getElementById("qwen-input");
+    const sendButton = document.getElementById("qwen-send");
 
-    <div id="file">
-      Checking model files...
-    </div>
+    let generator = null;
+    let busy = false;
+    let modelPromise = null;
+    let hidden = false;
 
-  </div>
+    const systemMessage = {
+      role: "system",
+      content:
+        "You are Qwen, a helpful AI assistant. " +
+        "Answer clearly, naturally, and accurately."
+    };
 
-  <div id="chat">
+    let conversation = [systemMessage];
 
-    <div class="msg bot">
-      <span class="label">Qwen:</span>
-      Loading Qwen3 locally...
-    </div>
-
-  </div>
-
-  <div id="inputArea">
-
-    <input
-      id="input"
-      placeholder="Talk to Qwen..."
-      disabled
-    >
-
-    <button
-      id="send"
-      disabled
-    >
-      Send
-    </button>
-
-  </div>
-
-</div>
-
-<script type="module">
-
-const MODEL = "onnx-community/Qwen3-0.6B-ONNX";
-
-const statusEl = document.getElementById("status");
-const fileEl = document.getElementById("file");
-
-const chat = document.getElementById("chat");
-
-const input = document.getElementById("input");
-const send = document.getElementById("send");
-
-let generator = null;
-
-let busy = false;
-
-let messages = [];
-
-
-/* ADD MESSAGE */
-
-function addMessage(who, text) {
-
-  const div = document.createElement("div");
-
-  div.className =
-    "msg " +
-    (who === "You" ? "user" : "bot");
-
-
-  const label = document.createElement("span");
-
-  label.className = "label";
-
-  label.textContent =
-    who === "You"
-      ? "You: "
-      : "Qwen: ";
-
-
-  const content = document.createElement("span");
-
-  content.textContent = text;
-
-
-  div.appendChild(label);
-
-  div.appendChild(content);
-
-  chat.appendChild(div);
-
-  chat.scrollTop = chat.scrollHeight;
-
-
-  return content;
-}
-
-
-/* LOAD QWEN */
-
-async function loadAI() {
-
-  try {
-
-    if (!navigator.gpu) {
-
-      throw new Error(
-        "WebGPU is not available."
-      );
-
+    function setStatus(text, ready = false) {
+      statusEl.textContent = text;
+      dot.classList.toggle("ready", ready);
     }
 
-
-    statusEl.textContent =
-      "Loading Qwen3...";
-
-    fileEl.textContent =
-      "Checking model files...";
-
-
-    const { pipeline } =
-      await import(
-        "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
-      );
-
-
-    /*
-      QWEN3 LOADER
-
-      KEEP THIS UNTOUCHED
-    */
-
-    generator = await pipeline(
-
-      "text-generation",
-
-      MODEL,
-
-      {
-        device: "webgpu",
-        dtype: "q4f16"
-      }
-
-    );
-
-
-    statusEl.textContent =
-      "Qwen3 Ready ✓";
-
-    fileEl.textContent =
-      "Model ready.";
-
-
-    input.disabled = false;
-
-    send.disabled = false;
-
+    function addMessage(text, role = "assistant", isError = false) {
+      const message = document.createElement("div");
+      message.className =
+        "message " + role + (isError ? " error" : "");
+      message.textContent = text;
+      messagesEl.appendChild(message);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return message;
+    }
 
     addMessage(
-      "Qwen",
-      "I'm ready. Ask me anything."
+      "Hey! I'm Qwen. I'm loading my AI model. " +
+      "This may take a few minutes the first time.",
+      "assistant"
     );
 
+    async function loadModel() {
+      if (generator) return generator;
+      if (modelPromise) return modelPromise;
 
-  } catch (error) {
+      modelPromise = (async () => {
+        try {
+          setStatus("Downloading model…");
 
-    console.error(error);
+          if (!navigator.gpu) {
+            throw new Error(
+              "WebGPU is unavailable. Try an updated Chrome or Edge browser."
+            );
+          }
 
+          const { pipeline } = await import(
+            "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
+          );
 
-    statusEl.textContent =
-      "Qwen3 failed to load";
+          setStatus("Loading Qwen3 0.6B…");
 
+          generator = await pipeline(
+            "text-generation",
+            "onnx-community/Qwen3-0.6B-ONNX",
+            {
+              device: "webgpu",
+              dtype: "q4f16"
+            }
+          );
 
-    fileEl.textContent =
-      error.message ||
-      String(error);
+          setStatus("Qwen ready ✓", true);
 
+          addMessage("I'm ready! What would you like to talk about?");
+          return generator;
+        } catch (error) {
+          generator = null;
+          modelPromise = null;
 
-    addMessage(
-      "Qwen",
-      "Model loading failed. See the loading message above."
-    );
+          setStatus("Couldn't load the model.");
+          addMessage(
+            "Model error: " + error.message +
+            "\n\nCheck your internet connection and WebGPU support, " +
+            "then refresh the page.",
+            "assistant",
+            true
+          );
 
-  }
+          throw error;
+        }
+      })();
 
-}
+      return modelPromise;
+    }
 
+    async function sendMessage(text) {
+      text = text.trim();
 
-/* SEND MESSAGE */
+      if (!text || busy) return;
 
-async function sendMessage() {
+      busy = true;
+      sendButton.disabled = true;
+      input.disabled = true;
 
-  if (!generator || busy) {
-    return;
-  }
+      addMessage(text, "user");
+      conversation.push({
+        role: "user",
+        content: text
+      });
 
+      const responseEl = addMessage("Thinking…", "assistant");
 
-  const text =
-    input.value.trim();
+      try {
+        const model = await loadModel();
 
+        responseEl.textContent = "Generating response…";
+        setStatus("Qwen is thinking…");
 
-  if (!text) {
-    return;
-  }
-
-
-  input.value = "";
-
-
-  busy = true;
-
-
-  input.disabled = true;
-
-  send.disabled = true;
-
-
-  addMessage(
-    "You",
-    text
-  );
-
-
-  messages.push({
-
-    role: "user",
-
-    content: text
-
-  });
-
-
-  const answer =
-    addMessage(
-      "Qwen",
-      ""
-    );
-
-
-  try {
-
-    const output =
-      await generator(
-
-        messages,
-
-        {
+        const result = await model(conversation, {
           max_new_tokens: 256,
-
           do_sample: false,
-
           return_full_text: false
+        });
+
+        const generated = result?.[0]?.generated_text;
+        let answer = "";
+
+        if (typeof generated === "string") {
+          answer = generated;
+        } else if (Array.isArray(generated)) {
+          answer = generated[generated.length - 1]?.content || "";
         }
 
-      );
+        answer = String(answer).trim();
 
-
-    let result = "";
-
-
-    if (output && output[0]) {
-
-      const generated =
-        output[0].generated_text;
-
-
-      if (
-        typeof generated ===
-        "string"
-      ) {
-
-        result = generated;
-
-      }
-
-      else if (
-        Array.isArray(generated)
-      ) {
-
-        const last =
-          generated[
-            generated.length - 1
-          ];
-
-
-        if (
-          last &&
-          typeof last.content ===
-          "string"
-        ) {
-
-          result =
-            last.content;
-
+        // Remove Qwen's optional internal-thinking section from display.
+        if (answer.startsWith("<think>")) {
+          const endThink = answer.indexOf("</think>");
+          if (endThink !== -1) {
+            answer = answer.slice(endThink + 8).trim();
+          }
         }
 
+        if (!answer) {
+          answer = "I couldn't generate a response. Try again.";
+        }
+
+        responseEl.textContent = answer;
+
+        conversation.push({
+          role: "assistant",
+          content: answer
+        });
+
+        setStatus("Qwen ready ✓", true);
+      } catch (error) {
+        responseEl.remove();
+
+        if (conversation.at(-1)?.role === "user") {
+          conversation.pop();
+        }
+
+        if (generator) {
+          addMessage("Error: " + error.message, "assistant", true);
+        }
+      } finally {
+        busy = false;
+        sendButton.disabled = false;
+        input.disabled = false;
+        input.focus();
+        messagesEl.scrollTop = messagesEl.scrollHeight;
       }
-
     }
 
-
-    if (!result) {
-
-      result =
-        "Qwen returned an empty response.";
-
-    }
-
-
-    answer.textContent =
-      result;
-
-
-    messages.push({
-
-      role: "assistant",
-
-      content: result
-
-    });
-
-
-  } catch (error) {
-
-    console.error(error);
-
-
-    answer.textContent =
-      "Error: " +
-      (
-        error.message ||
-        String(error)
-      );
-
-  }
-
-
-  busy = false;
-
-
-  input.disabled = false;
-
-  send.disabled = false;
-
-
-  input.focus();
-
-}
-
-
-/* SEND BUTTON */
-
-send.addEventListener(
-  "click",
-  sendMessage
-);
-
-
-/* ENTER KEY */
-
-input.addEventListener(
-  "keydown",
-  event => {
-
-    if (event.key === "Enter") {
-
+    form.addEventListener("submit", event => {
       event.preventDefault();
 
-      sendMessage();
+      const text = input.value;
+      input.value = "";
+      input.style.height = "42px";
 
+      sendMessage(text);
+    });
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+
+    input.addEventListener("input", () => {
+      input.style.height = "42px";
+      input.style.height =
+        Math.min(input.scrollHeight, 100) + "px";
+    });
+
+    document.getElementById("qwen-clear").addEventListener("click", () => {
+      if (busy) return;
+
+      messagesEl.replaceChildren();
+      conversation = [systemMessage];
+
+      addMessage("Chat cleared. Ask me something!");
+      setStatus(
+        generator ? "Qwen ready ✓" : "Loading model…",
+        !!generator
+      );
+    });
+
+    document.getElementById("qwen-close").addEventListener("click", () => {
+      hidden = !hidden;
+      box.style.display = hidden ? "none" : "flex";
+
+      if (!hidden) input.focus();
+    });
+
+    // Drag the chat window using its header.
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    header.addEventListener("pointerdown", event => {
+      if (event.target.closest("button")) return;
+
+      dragging = true;
+
+      const rect = box.getBoundingClientRect();
+      offsetX = event.clientX - rect.left;
+      offsetY = event.clientY - rect.top;
+
+      box.style.left = rect.left + "px";
+      box.style.top = rect.top + "px";
+      box.style.right = "auto";
+      box.style.bottom = "auto";
+
+      header.setPointerCapture(event.pointerId);
+    });
+
+    header.addEventListener("pointermove", event => {
+      if (!dragging) return;
+
+      const maxX = window.innerWidth - box.offsetWidth;
+      const maxY = window.innerHeight - box.offsetHeight;
+
+      box.style.left =
+        Math.max(0, Math.min(maxX, event.clientX - offsetX)) + "px";
+
+      box.style.top =
+        Math.max(0, Math.min(maxY, event.clientY - offsetY)) + "px";
+    });
+
+    function stopDragging() {
+      dragging = false;
     }
 
-  }
-);
+    header.addEventListener("pointerup", stopDragging);
+    header.addEventListener("pointercancel", stopDragging);
 
-
-/* DRAG WINDOW */
-
-const app =
-  document.getElementById("app");
-
-const header =
-  document.getElementById("header");
-
-
-let dragging = false;
-
-let startX = 0;
-
-let startY = 0;
-
-let startLeft = 0;
-
-let startTop = 0;
-
-
-header.addEventListener(
-  "pointerdown",
-  event => {
-
-    dragging = true;
-
-
-    const rect =
-      app.getBoundingClientRect();
-
-
-    startX =
-      event.clientX;
-
-    startY =
-      event.clientY;
-
-
-    startLeft =
-      rect.left;
-
-    startTop =
-      rect.top;
-
-
-    app.style.transform =
-      "none";
-
-
-    header.setPointerCapture(
-      event.pointerId
-    );
-
-  }
-);
-
-
-header.addEventListener(
-  "pointermove",
-  event => {
-
-    if (!dragging) {
-      return;
-    }
-
-
-    const dx =
-      event.clientX -
-      startX;
-
-
-    const dy =
-      event.clientY -
-      startY;
-
-
-    let left =
-      startLeft + dx;
-
-
-    let top =
-      startTop + dy;
-
-
-    left =
-      Math.max(
-        0,
-        Math.min(
-          window.innerWidth -
-          app.offsetWidth,
-          left
-        )
-      );
-
-
-    top =
-      Math.max(
-        0,
-        Math.min(
-          window.innerHeight -
-          app.offsetHeight,
-          top
-        )
-      );
-
-
-    app.style.left =
-      left + "px";
-
-
-    app.style.top =
-      top + "px";
-
-  }
-);
-
-
-header.addEventListener(
-  "pointerup",
-  () => {
-    dragging = false;
-  }
-);
-
-
-header.addEventListener(
-  "pointercancel",
-  () => {
-    dragging = false;
-  }
-);
-
-
-/* START */
-
-loadAI();
-
-</script>
-
+    // Load the model automatically when the webpage opens.
+    loadModel().catch(() => {});
+  </script>
 </body>
 </html>
