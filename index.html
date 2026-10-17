@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +7,7 @@
 <title>Local Qwen AI V7</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -19,741 +18,450 @@ html, body {
   color: white;
 }
 
-/* V7 BACKDROP */
 body {
   background:
-    radial-gradient(
-      circle at 50% 15%,
-      rgba(90, 35, 35, 0.55),
-      transparent 38%
-    ),
-    linear-gradient(
-      145deg,
-      #090909,
-      #171010 55%,
-      #050505
-    );
+    radial-gradient(circle at 50% 15%, rgba(90,35,35,.55), transparent 38%),
+    linear-gradient(145deg, #090909, #171010 55%, #050505);
 }
 
-/* MAIN WINDOW */
 #app {
   position: absolute;
   width: 300px;
   height: 300px;
-
   left: 50%;
   top: 50%;
-
   transform: translate(-50%, -50%);
-
-  background: rgba(10, 10, 10, 0.96);
-
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10,10,10,.96);
+  border: 1px solid rgba(255,255,255,.14);
   border-radius: 12px;
-
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
   overflow: hidden;
 }
 
-/* TOP BAR */
 #header {
   height: 42px;
-
   display: flex;
   align-items: center;
-
   padding: 0 12px;
-
-  background: rgba(255, 255, 255, 0.055);
-
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
+  background: rgba(255,255,255,.055);
+  border-bottom: 1px solid rgba(255,255,255,.08);
   cursor: grab;
-
   user-select: none;
   touch-action: none;
 }
 
-#header:active {
-  cursor: grabbing;
-}
+#header:active { cursor: grabbing; }
 
 #dot {
   width: 8px;
   height: 8px;
-
   border-radius: 50%;
-
   background: #b83a3a;
-
   margin-right: 8px;
+  flex-shrink: 0;
 }
 
-#title {
-  font-size: 13px;
-  font-weight: 700;
-}
+#title { font-size: 13px; font-weight: 700; }
 
 #version {
   margin-left: auto;
-
   font-size: 9px;
-
-  opacity: 0.4;
+  opacity: .4;
+  margin-right: 8px;
 }
 
-/* STATUS */
-#statusArea {
-  padding: 10px 12px 4px;
+#pipButton {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 7px;
+  background: rgba(143,52,52,.55);
+  color: white;
+  font-size: 17px;
+  cursor: pointer;
+  touch-action: manipulation;
 }
+
+#pipButton:hover { background: #8f3434; }
+
+#statusArea { padding: 10px 12px 4px; }
 
 #status {
   font-size: 11px;
-
   margin-bottom: 3px;
-
   color: #e2e8f0;
 }
 
 #file {
   font-size: 9px;
-
   color: #94a3b8;
-
   white-space: nowrap;
-
   overflow: hidden;
-
   text-overflow: ellipsis;
 }
 
-/* CHAT */
 #chat {
   position: absolute;
-
   top: 72px;
   bottom: 48px;
-
   left: 0;
   right: 0;
-
   padding: 7px 11px;
-
   overflow-y: auto;
-
   font-size: 11px;
 }
 
 .msg {
   margin-bottom: 8px;
-
   line-height: 1.4;
-
   white-space: pre-wrap;
-
   word-break: break-word;
 }
 
-.user {
-  color: #f0b4b4;
-}
+.user { color: #f0b4b4; }
+.bot { color: #e2e8f0; }
+.label { font-weight: 700; }
 
-.bot {
-  color: #e2e8f0;
-}
-
-.label {
-  font-weight: 700;
-}
-
-/* INPUT */
 #inputArea {
   position: absolute;
-
   left: 8px;
   right: 8px;
   bottom: 8px;
-
   display: flex;
-
   gap: 6px;
 }
 
 #input {
   flex: 1;
-
   min-width: 0;
-
   height: 32px;
-
   padding: 0 9px;
-
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
+  border: 1px solid rgba(255,255,255,.1);
   border-radius: 9px;
-
-  background: rgba(255, 255, 255, 0.06);
-
+  background: rgba(255,255,255,.06);
   color: white;
-
   outline: none;
-
   font-size: 11px;
 }
 
 #send {
   width: 48px;
-
   border: 0;
-
   border-radius: 9px;
-
   background: #8f3434;
-
   color: white;
-
   font-weight: 700;
-
   cursor: pointer;
 }
 
-#send:disabled {
-  opacity: 0.4;
+#send:disabled { opacity: .4; }
+
+#pipNotice {
+  display: none;
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 47px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: #381d1d;
+  color: #ffdada;
+  font-size: 10px;
 }
 </style>
 </head>
 
 <body>
-
 <div id="app">
-
   <div id="header">
     <div id="dot"></div>
-
-    <div id="title">
-      Local Qwen AI
-    </div>
-
-    <div id="version">
-      V7
-    </div>
+    <div id="title">Local Qwen AI</div>
+    <div id="version">V7</div>
+    <button id="pipButton" title="Open Picture-in-Picture window"
+      aria-label="Open Picture-in-Picture">⧉</button>
   </div>
 
   <div id="statusArea">
-
-    <div id="status">
-      Starting local AI...
-    </div>
-
-    <div id="file">
-      Checking model files...
-    </div>
-
+    <div id="status">Starting local AI...</div>
+    <div id="file">Checking model files...</div>
   </div>
 
   <div id="chat">
-
     <div class="msg bot">
       <span class="label">Qwen:</span>
       Loading Qwen3 locally...
     </div>
-
   </div>
+
+  <div id="pipNotice" role="status"></div>
 
   <div id="inputArea">
-
-    <input
-      id="input"
-      placeholder="Talk to Qwen..."
-      disabled
-    >
-
-    <button
-      id="send"
-      disabled
-    >
-      Send
-    </button>
-
+    <input id="input" placeholder="Talk to Qwen..." disabled>
+    <button id="send" disabled>Send</button>
   </div>
-
 </div>
 
 <script type="module">
-
 const MODEL = "onnx-community/Qwen3-0.6B-ONNX";
 
 const statusEl = document.getElementById("status");
 const fileEl = document.getElementById("file");
-
 const chat = document.getElementById("chat");
-
 const input = document.getElementById("input");
 const send = document.getElementById("send");
+const app = document.getElementById("app");
+const header = document.getElementById("header");
+const pipButton = document.getElementById("pipButton");
+const pipNotice = document.getElementById("pipNotice");
 
 let generator = null;
-
 let busy = false;
-
 let messages = [];
-
-
-/* ADD MESSAGE */
+let pipWindow = null;
+let isInPiP = false;
 
 function addMessage(who, text) {
-
   const div = document.createElement("div");
-
-  div.className =
-    "msg " +
-    (who === "You" ? "user" : "bot");
-
+  div.className = "msg " + (who === "You" ? "user" : "bot");
 
   const label = document.createElement("span");
-
   label.className = "label";
-
-  label.textContent =
-    who === "You"
-      ? "You: "
-      : "Qwen: ";
-
+  label.textContent = who === "You" ? "You: " : "Qwen: ";
 
   const content = document.createElement("span");
-
   content.textContent = text;
 
-
   div.appendChild(label);
-
   div.appendChild(content);
-
   chat.appendChild(div);
-
   chat.scrollTop = chat.scrollHeight;
-
 
   return content;
 }
 
-
-/* LOAD QWEN */
-
 async function loadAI() {
-
   try {
-
     if (!navigator.gpu) {
-
-      throw new Error(
-        "WebGPU is not available."
-      );
-
+      throw new Error("WebGPU is not available.");
     }
 
+    statusEl.textContent = "Loading Qwen3...";
+    fileEl.textContent = "Checking model files...";
 
-    statusEl.textContent =
-      "Loading Qwen3...";
-
-    fileEl.textContent =
-      "Checking model files...";
-
-
-    const { pipeline } =
-      await import(
-        "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
-      );
-
-
-    /*
-      QWEN3 LOADER
-
-      KEEP THIS UNTOUCHED
-    */
-
-    generator = await pipeline(
-
-      "text-generation",
-
-      MODEL,
-
-      {
-        device: "webgpu",
-        dtype: "q4f16"
-      }
-
+    const { pipeline } = await import(
+      "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"
     );
 
+    // Original Qwen3 loader preserved.
+    generator = await pipeline("text-generation", MODEL, {
+      device: "webgpu",
+      dtype: "q4f16"
+    });
 
-    statusEl.textContent =
-      "Qwen3 Ready ✓";
-
-    fileEl.textContent =
-      "Model ready.";
-
-
+    statusEl.textContent = "Qwen3 Ready ✓";
+    fileEl.textContent = "Model ready.";
     input.disabled = false;
-
     send.disabled = false;
 
-
-    addMessage(
-      "Qwen",
-      "I'm ready. Ask me anything."
-    );
-
-
+    chat.innerHTML = "";
+    addMessage("Qwen", "I'm ready. Ask me anything.");
   } catch (error) {
-
     console.error(error);
-
-
-    statusEl.textContent =
-      "Qwen3 failed to load";
-
-
-    fileEl.textContent =
-      error.message ||
-      String(error);
-
-
-    addMessage(
-      "Qwen",
-      "Model loading failed. See the loading message above."
-    );
-
+    statusEl.textContent = "Qwen3 failed to load";
+    fileEl.textContent = error.message || String(error);
+    addMessage("Qwen", "Model loading failed. See the loading message above.");
   }
-
 }
 
-
-/* SEND MESSAGE */
-
 async function sendMessage() {
+  if (!generator || busy) return;
 
-  if (!generator || busy) {
-    return;
-  }
-
-
-  const text =
-    input.value.trim();
-
-
-  if (!text) {
-    return;
-  }
-
+  const text = input.value.trim();
+  if (!text) return;
 
   input.value = "";
-
-
   busy = true;
-
-
   input.disabled = true;
-
   send.disabled = true;
 
+  addMessage("You", text);
+  messages.push({ role: "user", content: text });
 
-  addMessage(
-    "You",
-    text
-  );
-
-
-  messages.push({
-
-    role: "user",
-
-    content: text
-
-  });
-
-
-  const answer =
-    addMessage(
-      "Qwen",
-      ""
-    );
-
+  const answer = addMessage("Qwen", "");
 
   try {
-
-    const output =
-      await generator(
-
-        messages,
-
-        {
-          max_new_tokens: 256,
-
-          do_sample: false,
-
-          return_full_text: false
-        }
-
-      );
-
+    const output = await generator(messages, {
+      max_new_tokens: 256,
+      do_sample: false,
+      return_full_text: false
+    });
 
     let result = "";
 
-
     if (output && output[0]) {
+      const generated = output[0].generated_text;
 
-      const generated =
-        output[0].generated_text;
-
-
-      if (
-        typeof generated ===
-        "string"
-      ) {
-
+      if (typeof generated === "string") {
         result = generated;
-
-      }
-
-      else if (
-        Array.isArray(generated)
-      ) {
-
-        const last =
-          generated[
-            generated.length - 1
-          ];
-
-
-        if (
-          last &&
-          typeof last.content ===
-          "string"
-        ) {
-
-          result =
-            last.content;
-
+      } else if (Array.isArray(generated)) {
+        const last = generated[generated.length - 1];
+        if (last && typeof last.content === "string") {
+          result = last.content;
         }
-
       }
-
     }
 
+    if (!result) result = "Qwen returned an empty response.";
 
-    if (!result) {
-
-      result =
-        "Qwen returned an empty response.";
-
-    }
-
-
-    answer.textContent =
-      result;
-
-
-    messages.push({
-
-      role: "assistant",
-
-      content: result
-
-    });
-
-
+    answer.textContent = result;
+    messages.push({ role: "assistant", content: result });
   } catch (error) {
-
     console.error(error);
-
-
-    answer.textContent =
-      "Error: " +
-      (
-        error.message ||
-        String(error)
-      );
-
+    answer.textContent = "Error: " + (error.message || String(error));
   }
-
 
   busy = false;
-
-
   input.disabled = false;
-
   send.disabled = false;
-
-
   input.focus();
-
 }
 
+send.addEventListener("click", sendMessage);
 
-/* SEND BUTTON */
+input.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    sendMessage();
+  }
+});
 
-send.addEventListener(
-  "click",
-  sendMessage
-);
+/* PICTURE-IN-PICTURE */
+pipButton.addEventListener("click", async () => {
+  if (!("documentPictureInPicture" in window)) {
+    pipNotice.style.display = "block";
+    pipNotice.textContent =
+      "This browser does not support Document PiP.";
+    return;
+  }
 
+  if (pipWindow && !pipWindow.closed) {
+    pipWindow.focus();
+    return;
+  }
 
-/* ENTER KEY */
+  try {
+    pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: 340,
+      height: 360
+    });
 
-input.addEventListener(
-  "keydown",
-  event => {
+    const pipDoc = pipWindow.document;
 
-    if (event.key === "Enter") {
-
-      event.preventDefault();
-
-      sendMessage();
-
+    // Copy the page's CSS into the separate PiP document.
+    for (const node of document.querySelectorAll(
+      'style, link[rel="stylesheet"]'
+    )) {
+      pipDoc.head.appendChild(node.cloneNode(true));
     }
 
-  }
-);
+    pipDoc.documentElement.style.cssText =
+      "height:100%;width:100%;overflow:hidden;background:#090909;";
 
+    pipDoc.body.style.cssText =
+      "height:100%;width:100%;margin:0;overflow:hidden;" +
+      "background:#090909;position:relative;";
+
+    // Move the existing interface; don't reload the model.
+    pipDoc.body.appendChild(app);
+    isInPiP = true;
+
+    app.style.position = "absolute";
+    app.style.width = "300px";
+    app.style.height = "300px";
+    app.style.left = "50%";
+    app.style.top = "50%";
+    app.style.transform = "translate(-50%, -50%)";
+
+    pipButton.textContent = "↗";
+    pipButton.title = "Return chat to the original page";
+
+    pipWindow.addEventListener("pagehide", () => {
+      isInPiP = false;
+      pipWindow = null;
+
+      // Return the same GUI to the original page.
+      document.body.appendChild(app);
+      app.style.position = "absolute";
+      app.style.width = "300px";
+      app.style.height = "300px";
+      app.style.left = "50%";
+      app.style.top = "50%";
+      app.style.transform = "translate(-50%, -50%)";
+
+      pipButton.textContent = "⧉";
+      pipButton.title = "Open Picture-in-Picture window";
+    }, { once: true });
+
+    input.focus();
+  } catch (error) {
+    console.error("PiP failed:", error);
+    pipNotice.style.display = "block";
+    pipNotice.textContent =
+      "PiP failed: " + (error.message || String(error));
+  }
+});
 
 /* DRAG WINDOW */
-
-const app =
-  document.getElementById("app");
-
-const header =
-  document.getElementById("header");
-
-
 let dragging = false;
-
 let startX = 0;
-
 let startY = 0;
-
 let startLeft = 0;
-
 let startTop = 0;
 
+header.addEventListener("pointerdown", event => {
+  if (event.target.closest("button")) return;
+  if (isInPiP) return;
 
-header.addEventListener(
-  "pointerdown",
-  event => {
+  dragging = true;
 
-    dragging = true;
+  const rect = app.getBoundingClientRect();
+  startX = event.clientX;
+  startY = event.clientY;
+  startLeft = rect.left;
+  startTop = rect.top;
 
+  app.style.transform = "none";
+  header.setPointerCapture(event.pointerId);
+});
 
-    const rect =
-      app.getBoundingClientRect();
+header.addEventListener("pointermove", event => {
+  if (!dragging || isInPiP) return;
 
+  const dx = event.clientX - startX;
+  const dy = event.clientY - startY;
 
-    startX =
-      event.clientX;
+  let left = startLeft + dx;
+  let top = startTop + dy;
 
-    startY =
-      event.clientY;
+  left = Math.max(0, Math.min(window.innerWidth - app.offsetWidth, left));
+  top = Math.max(0, Math.min(window.innerHeight - app.offsetHeight, top));
 
+  app.style.left = left + "px";
+  app.style.top = top + "px";
+});
 
-    startLeft =
-      rect.left;
+function stopDragging() {
+  dragging = false;
+}
 
-    startTop =
-      rect.top;
-
-
-    app.style.transform =
-      "none";
-
-
-    header.setPointerCapture(
-      event.pointerId
-    );
-
-  }
-);
-
-
-header.addEventListener(
-  "pointermove",
-  event => {
-
-    if (!dragging) {
-      return;
-    }
-
-
-    const dx =
-      event.clientX -
-      startX;
-
-
-    const dy =
-      event.clientY -
-      startY;
-
-
-    let left =
-      startLeft + dx;
-
-
-    let top =
-      startTop + dy;
-
-
-    left =
-      Math.max(
-        0,
-        Math.min(
-          window.innerWidth -
-          app.offsetWidth,
-          left
-        )
-      );
-
-
-    top =
-      Math.max(
-        0,
-        Math.min(
-          window.innerHeight -
-          app.offsetHeight,
-          top
-        )
-      );
-
-
-    app.style.left =
-      left + "px";
-
-
-    app.style.top =
-      top + "px";
-
-  }
-);
-
-
-header.addEventListener(
-  "pointerup",
-  () => {
-    dragging = false;
-  }
-);
-
-
-header.addEventListener(
-  "pointercancel",
-  () => {
-    dragging = false;
-  }
-);
-
-
-/* START */
+header.addEventListener("pointerup", stopDragging);
+header.addEventListener("pointercancel", stopDragging);
 
 loadAI();
-
 </script>
-
 </body>
 </html>
